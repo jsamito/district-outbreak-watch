@@ -1,0 +1,131 @@
+/* District Outbreak Watch: original styles layered over the AdminLTE shell.
+   Design tokens first; colours were chosen for WCAG 2.2 AA contrast and
+   colour-blind safety (Okabe-Ito categorical palette). */
+
+:root {
+    --ow-ink: #1b2733;
+    --ow-muted: #4a5a68;
+    --ow-bg: #f4f6f8;
+    --ow-surface: #ffffff;
+    --ow-border: #cfd8df;
+    --ow-primary: #1d5c8a;
+    --ow-primary-dark: #164a70;
+    --ow-link: #0b5a8a;
+    --ow-focus: #ffbf47;
+    --ow-focus-dark: #0b3d91;
+    --ow-warn-bg: #fff3cd;
+    --ow-warn-ink: #4d3b00;
+    --ow-danger: #a4262c;
+    --ow-ok: #14683f;
+
+    /* Okabe-Ito categorical palette */
+    --ow-c1: #0072b2;
+    --ow-c2: #e69f00;
+    --ow-c3: #009e73;
+    --ow-c4: #d55e00;
+    --ow-c5: #cc79a7;
+    --ow-c6: #56b4e9;
+    --ow-c7: #f0e442;
+
+    --ow-radius: 4px;
+    --ow-target: 44px;
+}
+
+html { scroll-padding-top: 70px; }
+body { color: var(--ow-ink); }
+a { color: var(--ow-link); }
+a:hover, a:focus { color: var(--ow-primary-dark); }
+
+/* Skip link */
+.ow-skip-link {
+    position: absolute; left: 8px; top: -60px; z-index: 2000;
+    background: var(--ow-ink); color: #fff; padding: 10px 16px; border-radius: var(--ow-radius);
+    text-decoration: none; font-weight: 600;
+}
+.ow-skip-link:focus { top: 8px; color: #fff; }
+
+/* Visible focus on every interactive element (WCAG 2.4.7, 2.4.11) */
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible,
+textarea:focus-visible, [tabindex]:focus-visible, summary:focus-visible {
+    outline: 3px solid var(--ow-focus-dark);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px #fff;
+}
+.main-header a:focus-visible, .main-sidebar a:focus-visible, .main-header button:focus-visible {
+    outline-color: var(--ow-focus);
+    box-shadow: none;
+}
+main:focus { outline: none; }
+
+/* Shell colour overrides for contrast */
+.skin-blue .main-header .navbar { background-color: var(--ow-primary); }
+.skin-blue .main-header .logo { background-color: var(--ow-primary-dark); color: #fff; }
+.skin-blue .main-header .logo:hover { background-color: #123d5c; }
+.skin-blue .main-header .navbar .sidebar-toggle:hover { background-color: #123d5c; }
+.skin-blue .main-header .navbar .nav > li > a { color: #fff; }
+.skin-blue .main-header .navbar .nav > li > a:hover,
+.skin-blue .main-header .navbar .nav .open > a { background-color: #123d5c; color: #fff; }
+.skin-blue .sidebar-menu > li.header { color: #c7d3db; background: #1a2226; }
+.skin-blue .sidebar a { color: #dfe7ec; }
+.skin-blue .sidebar-menu > li > a { border-left: 3px solid transparent; }
+.skin-blue .sidebar-menu > li.active > a { color: #fff; border-left-color: var(--ow-focus); }
+.content-wrapper, .right-side { background-color: var(--ow-bg); }
+.main-footer { color: var(--ow-muted); }
+
+/* Touch targets (WCAG 2.5.8): at least 24px, 44px for primary controls */
+.btn, .form-control, .sidebar-menu > li > a { min-height: 36px; }
+.btn-lg, .login-box .btn, .login-box .form-control { min-height: var(--ow-target); }
+.sidebar-toggle { min-width: 44px; min-height: 50px; }
+
+/* Banner */
+.ow-banner {
+    background: var(--ow-warn-bg); color: var(--ow-warn-ink);
+    padding: 8px 15px; border-bottom: 1px solid #e6d28c; font-size: 13px;
+}
+
+/* User menu */
+.ow-user-menu { min-width: 240px; padding: 10px; }
+.ow-user-menu__info { display: flex; flex-direction: column; gap: 2px; padding: 4px 4px 10px; color: var(--ow-ink); }
+.ow-user-menu__info span { color: var(--ow-muted); font-size: 13px; }
+.ow-user-menu__action form { margin: 0; }
+
+/* Headings and lists */
+.content-header > h1 { font-size: 24px; }
+.content-header > h1 > small { color: var(--ow-muted); }
+.ow-h3 { font-size: 16px; font-weight: 600; margin: 18px 0 8px; }
+.ow-list { padding-left: 18px; columns: 2; }
+.ow-dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 18px; margin: 0; }
+.ow-dl dt { color: var(--ow-muted); font-weight: 600; }
+.ow-dl dd { margin: 0; }
+.ow-breadcrumb { background: transparent; padding-left: 0; margin-bottom: 10px; }
+.ow-breadcrumb > li + li:before { content: "/\00a0"; }
+
+/* Login */
+.ow-login-title { font-size: 20px; color: var(--ow-ink); padding: 0 0 14px; }
+.ow-login-note { margin: 16px 0 0; color: var(--ow-muted); font-size: 13px; text-align: center; }
+.login-page { background: var(--ow-bg); }
+.login-logo a { color: var(--ow-primary-dark); }
+
+/* Public pages */
+.ow-public { background: var(--ow-bg); }
+.ow-public__header { background: var(--ow-primary); color: #fff; padding: 14px 20px; font-size: 18px; }
+.ow-public main { padding-top: 32px; padding-bottom: 48px; }
+
+@media (max-width: 767px) {
+    .ow-list { columns: 1; }
+    .ow-dl { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+}
+
+@media print {
+    .main-sidebar, .main-header, .ow-banner, .ow-skip-link { display: none; }
+    .content-wrapper { margin-left: 0; }
+}
+
+/* Primary buttons: darker blue for AA contrast with white text */
+.btn-primary { background-color: var(--ow-primary); border-color: var(--ow-primary-dark); color: #fff; }
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active { background-color: var(--ow-primary-dark); border-color: #123d5c; color: #fff; }
+.btn-default { color: var(--ow-ink); }

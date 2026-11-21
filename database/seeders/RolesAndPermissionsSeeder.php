@@ -1,0 +1,51 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
+
+class RolesAndPermissionsSeeder extends Seeder
+{
+    public const ROLES = [
+        'system_admin' => [
+            'manage users', 'manage data sources', 'manage alert rules', 'view audit log',
+        ],
+        'national_manager' => [
+            'view aggregates', 'view forecasts', 'view alerts', 'acknowledge alerts', 'manage alert rules',
+            'export aggregates', 'annotate charts', 'view audit summary',
+        ],
+        'epidemiologist' => [
+            'view aggregates', 'view forecasts', 'view alerts', 'view cases pseudonymised',
+            'export aggregates', 'annotate charts',
+        ],
+        'district_officer' => [
+            'view aggregates', 'view forecasts', 'view alerts', 'acknowledge alerts', 'view cases',
+            'edit cases', 'enter lab results', 'export aggregates', 'annotate charts',
+        ],
+        'clinician' => [
+            'view aggregates', 'view alerts', 'acknowledge alerts', 'view cases', 'edit cases',
+            'export aggregates',
+        ],
+        'lab_officer' => [
+            'view lab worklist', 'enter lab results',
+        ],
+    ];
+
+    public function run(): void
+    {
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+
+        $all = collect(self::ROLES)->flatten()->unique();
+        foreach ($all as $name) {
+            Permission::findOrCreate($name, 'web');
+        }
+        foreach (self::ROLES as $role => $permissions) {
+            Role::findOrCreate($role, 'web')->syncPermissions($permissions);
+        }
+
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+    }
+}
