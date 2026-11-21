@@ -31,6 +31,7 @@ return new class extends Migration
             $table->string('facility_type', 24); // hospital | hc4 | hc3 | hc2 | clinic
             $table->string('ownership', 40)->nullable();
             $table->string('source_ref', 40)->nullable(); // OSM id in the Healthsites file
+            $table->boolean('sentinel')->default(false); // weekly reporting facility
             $table->unsignedSmallInteger('beds')->nullable();
             $table->json('services')->nullable();
             $table->timestamps();

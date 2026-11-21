@@ -1,0 +1,9 @@
+{
+    "prepared_on": "2026-11-21",
+    "districts": 135,
+    "regions": 4,
+    "population_total": 46210758,
+    "facilities": 4980,
+    "sentinel_facilities": 789,
+    "tolerance_degrees": 0.006
+}
