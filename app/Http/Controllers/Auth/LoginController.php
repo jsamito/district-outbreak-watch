@@ -23,7 +23,7 @@ class LoginController extends Controller
             'password' => ['required', 'string'],
         ]);
 
-        if (Auth::attempt([...$credentials, 'active' => true])) {
+        if (Auth::attempt([...$credentials, 'active' => true], $request->boolean('remember'))) {
             $request->session()->regenerate();
             $request->user()->forceFill(['last_login_at' => now()])->save();
             Audit::log(Audit::AUTH, 'login');

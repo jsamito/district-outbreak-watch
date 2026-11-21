@@ -23,7 +23,7 @@ class LoginTest extends TestCase
         $this->get('/login')->assertOk()
             ->assertSee('for="email"', false)
             ->assertSee('for="password"', false)
-            ->assertSee('autocomplete="current-password"', false)
+            ->assertSee('autocomplete="current-password"', false)->assertSee('Remember me', false)
             ->assertDontSee('onpaste', false);
     }
 
