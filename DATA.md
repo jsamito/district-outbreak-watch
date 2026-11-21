@@ -1,61 +1,37 @@
 # Data sources, provenance and permitted use
 
-No real or identifiable patient data is used anywhere in this project. Everything below is either openly published aggregate data or synthetic.
+No real or identifiable patient data is used anywhere in this project. Everything below is either openly published aggregate data or synthetic. Country: **Uganda**.
 
-## 1. DHIS2 Sierra Leone demo database
+## 1. Open data used as published
 
+| Dataset | Source and licence | Used for |
+|---|---|---|
+| Subnational administrative boundaries (COD-AB), levels 0–2 | OCHA / Uganda Bureau of Statistics via HDX, https://data.humdata.org/dataset/cod-ab-uga — **CC BY-IGO**. 4 regions, 135 districts. Dataset updated 24 Sep 2026 | Org hierarchy and district polygons (simplified for the map) |
+| Subnational population statistics (COD-PS), district level, by age and sex | UBOS projections supported by UNFPA, P-coded by OCHA, via HDX, https://data.humdata.org/dataset/cod-ps-uga — **CC BY-IGO**. File year column: 2022; total 46.2 million | Denominators for incidence and vaccination coverage. Under-1 population is approximated as one fifth of the 0–4 group |
+| Uganda Healthsites | Open Healthsite Consulting via HDX, https://data.humdata.org/dataset/uganda-healthsites — **ODbL** (OpenStreetMap-derived, 8,061 records) | Facility names, locations and types |
+| WHO Global Health Observatory | WHO GHO OData API, https://ghoapi.azureedge.net/api — indicators WHS8_110 (MCV1), WHS4_100 (DTP3), WHS4_543 (BCG), WUENIC estimates for Uganda. **Reuse terms not confirmed**: cite WHO and check terms before redistribution | National benchmark next to district coverage |
+| Wikipedia page views | Wikimedia Pageviews REST API, English Wikipedia, user traffic. Public API requiring a descriptive User-Agent. **Reuse terms not confirmed** | Web-attention metric. Global English page views, **not** specific to Uganda |
+
+Accessed 22 Nov 2026. Downloaded files are kept outside the repository; only small, derived aggregate files are committed under `database/data/`.
+
+## 2. Limits of the open data
+- **Facility types** are inferred from OpenStreetMap tags and names, not from Uganda's official health-centre levels (HC II, III, IV, hospitals). The mapping is a documented heuristic.
+- **Population** is a single projected year for each district. Other years are extrapolated with a flat growth rate stated in the code.
+- No open weekly facility-level disease series or district immunization series exists for Uganda. Those are synthetic (next section).
+
+## 3. Synthetic data
 | Item | Detail |
 |---|---|
-| Source | https://databases.dhis2.org/sierra-leone/2.43.2/dhis2-db-sierra-leone.sql.gz (90,059,621 bytes) |
-| SHA-256 | 8127729c280ee2a1c11eeb2adfbe0a55b86ff14344b32ad1b876a0e19f342029 |
-| Accessed | 22 Nov 2026 |
-| Licence / terms | **Not found.** DHIS2 publishes the file as a public demo database for evaluation. The dump itself is not committed or redistributed; only the aggregate extract below is |
-| Extraction | `etl/extract_dhis2.py` streams the dump and writes `database/data/dhis2/` |
-
-Used:
-- **Org structure:** 1 country, 13 districts (with polygons, simplified), 152 chiefdoms, 1,166 facilities with facility type, ownership and urban/rural.
-- **Population:** yearly 2016–2026 per facility (total, under 1, under 5, women of child-bearing age, expected pregnancies).
-- **Immunization:** monthly doses 2016–2026 for BCG, OPV3, Penta3, measles, yellow fever and fully immunized child, aggregated to district, with the under-1 population of the *reporting* facilities as the matched denominator.
-- **IDSR sentinel list:** the 207 facilities that report weekly IDSR.
-
-Not used, and why:
-- **IDSR weekly disease values** (cholera, measles, malaria, plague, yellow fever): in the demo these are uniform random integers from 0 to 5 for every disease, present for only 31 sparse weeks, and every reporting facility reports every one of those weeks. They cannot show seasonality, outbreaks or reporting delays, so they are not used as the weekly series.
-- Monthly morbidity data: only 24 months, so too short for baselines.
-- Everything else in the dump (users, messages, tracker data and so on).
-
-Consequence: **weekly facility disease reports are synthetic** (see section 4). Immunization, population and geography are the DHIS2 demo's own values.
-
-Known data-quality issues kept visible rather than hidden: some district immunization coverage exceeds 100% (flagged in the dashboard).
-
-## 2. WHO Global Health Observatory (reference data)
-
-| Item | Detail |
-|---|---|
-| Source | WHO GHO OData API, https://ghoapi.azureedge.net/api |
-| Indicators | WHS8_110 (MCV1), WHS4_100 (DTP3), WHS4_543 (BCG) — WUENIC estimates, % of 1-year-olds, Sierra Leone, yearly |
-| Accessed | 22 Nov 2026 (snapshot in `database/data/external/who_immunization_sle.csv`) |
-| Licence / terms | Not confirmed in this project; cite WHO as the source and check WHO's terms before any redistribution |
-| Use | National benchmark line next to district coverage |
-
-## 3. Wikipedia page views (web-attention metric)
-
-| Item | Detail |
-|---|---|
-| Source | Wikimedia Pageviews REST API, English Wikipedia, user traffic, articles Measles, Cholera, Malaria, Plague, Yellow fever |
-| Accessed | 22 Nov 2026 (snapshot in `database/data/external/wikipedia_pageviews_weekly.csv`) |
-| Terms | Public API, requires a descriptive User-Agent; rate limits changed in 2026. Terms of reuse to be confirmed |
-| Limitation | Global English page views, **not** specific to Sierra Leone. Shown as general public attention, not local demand |
-
-## 4. Synthetic data
-
-| Item | Detail |
-|---|---|
-| Weekly facility reports | Generated by `php artisan surveillance:seed-demo` for the 207 IDSR facilities: per-disease baseline rates scaled by facility population, seasonality, a few outbreak scenarios, facility reporting propensity. Marked `origin = synthetic` |
-| Cases | Expanded from the weekly facility reports by `SyntheticCaseGenerator` with documented distributions (age, sex, classification, outcome, vaccination history). Every person and case is flagged `is_synthetic` and the UI shows a synthetic-data banner |
+| Weekly facility disease reports | Generated by `php artisan surveillance:seed-demo` for sentinel facilities: per-disease baseline rates scaled by district population, seasonality, facility reporting propensity, and a few outbreak scenarios. Marked `origin = synthetic` |
+| District immunization doses | Generated monthly from the under-1 population and WHO national coverage, with district variation, seasonality and dips. Marked synthetic |
+| Cases | Expanded from the weekly facility reports for case-reported diseases (measles, cholera, typhoid, Ebola) by `SyntheticCaseGenerator` with documented distributions. Malaria is aggregate only. Every person and case has `is_synthetic = true` and the UI shows a synthetic-data banner |
 | Purpose | Demonstrate detection, alerting, case management, real-time ingestion and forecasting without real patient data |
 | Not clinical truth | Rates and scenarios are plausible for demonstration only |
 
+## 4. Evaluated and rejected
+The DHIS2 Sierra Leone demo database (https://databases.dhis2.org/sierra-leone/2.43.2/dhis2-db-sierra-leone.sql.gz, 90 MB, SHA-256 8127729c280ee2a1c11eeb2adfbe0a55b86ff14344b32ad1b876a0e19f342029) was inspected first. Its weekly IDSR disease values are uniform random integers from 0 to 5 for every disease, present for only 31 sparse weeks, so they cannot show seasonality or outbreaks. No licence terms were found. It is not used and not redistributed.
+
 ## 5. Rules applied
 - Aggregates only in exports, the public site and email alerts.
-- No external API is called at runtime; imports read the dated snapshots.
+- No external API is called at runtime; imports read dated snapshots.
 - Datasets, licences and access dates are shown on the provenance page, from the `data_sources` table.
