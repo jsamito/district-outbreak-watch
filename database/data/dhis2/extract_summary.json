@@ -1,0 +1,47 @@
+{
+  "source": "DHIS2 Sierra Leone demo database",
+  "file": "dhis2-db-sierra-leone.sql.gz",
+  "url": "https://databases.dhis2.org/sierra-leone/2.43.2/dhis2-db-sierra-leone.sql.gz",
+  "size_bytes": 90059621,
+  "sha256": "8127729c280ee2a1c11eeb2adfbe0a55b86ff14344b32ad1b876a0e19f342029",
+  "extracted_at": "2026-11-21T21:24:03+00:00",
+  "org_units": 1332,
+  "districts_with_geometry": 13,
+  "population_rows": 11352,
+  "immunization_rows": 9402,
+  "idsr_facilities_reporting": 207,
+  "idsr_weeks_with_data": 31,
+  "idsr_demo_value_stats": {
+    "IDSR Cholera": {
+      "n": 6417,
+      "nonzero": 4915,
+      "sum": 12246.0,
+      "max": 5.0
+    },
+    "IDSR Measles": {
+      "n": 6417,
+      "nonzero": 4930,
+      "sum": 12462.0,
+      "max": 5.0
+    },
+    "IDSR Plague": {
+      "n": 6417,
+      "nonzero": 4943,
+      "sum": 12539.0,
+      "max": 5.0
+    },
+    "IDSR Yellow fever": {
+      "n": 6417,
+      "nonzero": 4941,
+      "sum": 12430.0,
+      "max": 5.0
+    },
+    "IDSR Malaria": {
+      "n": 6417,
+      "nonzero": 5001,
+      "sum": 12588.0,
+      "max": 5.0
+    }
+  },
+  "note": "IDSR weekly values in the demo are uniform random integers 0-5 for every disease, present for only a sparse subset of weeks, so they cannot show real outbreak dynamics. Only the facility reporting behaviour is used from them."
+}

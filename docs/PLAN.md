@@ -92,7 +92,7 @@ Roles say *what* a user can do; scope says *where* (which org units). Both are e
 Login with password manager and paste support; throttled attempts; session timeout; role and org-unit scope; user management for admins; audit log of logins, case views, exports and configuration changes.
 
 ### 4.2 Org structure and reference data
-Country → region → district → facility hierarchy with geometry for districts; facility profiles; populations by year, age group and sex; disease list with ICD-10 codes and immediate-notifiable flag; antigen list; indicator definitions.
+Country → district → chiefdom → facility hierarchy (13 districts with polygons, 1,166 facilities with type and ownership); facility profiles; populations by year, age group and sex; disease list with ICD-10 codes and immediate-notifiable flag; antigen list; indicator definitions.
 
 ### 4.3 Data import and provenance
 Import commands for the DHIS2 extract, WHO reference data and web metrics; validation, rejection counts, idempotent re-runs; every dataset recorded with source, licence, access date and batch. The app never calls external APIs at runtime.
@@ -226,7 +226,7 @@ About 33 tables in seven groups. Indicators are data, not hard-coded tables, so 
 ### 7.1 Reference and structure
 | Model | Key fields | Relationships |
 |---|---|---|
-| `OrgUnit` | `parent_id`, level, type (country/region/district/facility), name, code, `path`, geometry (nullable), lat, lng, active | belongsTo parent; hasMany children; hasOne `FacilityProfile`; belongsToMany `User` (scope); hasMany `Population`, `IndicatorValue`, `Case` |
+| `OrgUnit` | `parent_id`, level, type (country/district/chiefdom/facility), name, code, `path`, geometry (nullable), lat, lng, active | belongsTo parent; hasMany children; hasOne `FacilityProfile`; belongsToMany `User` (scope); hasMany `Population`, `IndicatorValue`, `Case` |
 | `FacilityProfile` | `org_unit_id`, facility_type, ownership, services (JSON) | belongsTo `OrgUnit` |
 | `Population` | `org_unit_id`, year, age_group, sex, value, `data_source_id` | belongsTo `OrgUnit`, `DataSource` |
 | `Disease` | name, `icd10_code`, priority, case_definition, immediate_notifiable | hasMany `Case`, `AlertRule`, `Indicator`, `ExternalMetric` |
@@ -362,9 +362,9 @@ erDiagram
 ### 9.1 Key decisions
 | Area | Decision |
 |---|---|
-| Primary data | DHIS2 Sierra Leone demo database restored locally and aggregated by an import command; fallback CDC NNDSS weekly (same schema) if weekly disease data is missing |
+| Primary data | DHIS2 Sierra Leone demo database (extracted by `etl/extract_dhis2.py`) supplies the org structure, district polygons, facility types, populations and monthly immunization doses. Its weekly IDSR disease values are random 0–5 integers present for only 31 sparse weeks, so they cannot show outbreak dynamics; weekly facility disease reports for the 207 IDSR facilities are therefore synthetic (`origin = synthetic`), generated with realistic baselines, seasonality and outbreak scenarios by `php artisan surveillance:seed-demo` |
 | Reference and web data | WHO GHO (MCV1 coverage), WHO provisional measles, Wikipedia page views; all imported, never called at runtime |
-| Patient-level data | Synthetic, generated from the aggregates by `SyntheticCaseGenerator` (documented distributions for age, sex, classification, outcome, vaccination); Synthea optional |
+| Patient-level data | Synthetic cases expanded from the synthetic weekly facility reports by `SyntheticCaseGenerator` (documented distributions for age, sex, classification, outcome, vaccination), so case totals always equal the aggregates; Synthea not used |
 | Outbreak signal | count > baseline mean + 3·√mean, 8-week baseline, 2-week guard, minimum 5; single-case rule for immediate-notifiable diseases; tuned by backtest |
 | Forecasting | Moving average and exponential smoothing, 1–4 weeks, residual intervals truncated at zero |
 | Real-time | Laravel Reverb with Echo, polling fallback |
@@ -476,9 +476,9 @@ Use Chart.js 4. Check which version your AdminLTE copy ships; your reference pro
 
 ---
 
-## 12. Open items to settle in Phase 0
-- Whether the DHIS2 demo contains weekly disease data (otherwise use the fallback).
-- Whether Synthea has the needed disease modules (the plan works without it).
-- Full list of case fields against the WHO standards.
-- Whether the WHO GHO endpoint and licence are as expected.
-- Which boundary file's district names match the imported org units.
+## 12. Phase 0 outcome (data discovery, done)
+- DHIS2 demo (Sierra Leone, v2.43.2, 90 MB) checked: 13 districts with polygons, 152 chiefdoms, 1,166 facilities, populations 2016–2026, monthly immunization doses 2016–2026. Weekly IDSR data exist for five diseases (cholera, measles, malaria, plague, yellow fever) but are random and sparse, so weekly disease series are synthetic.
+- Disease set: cholera (A00), measles (B05), malaria (B50–B54), yellow fever (A95), plague (A20). Typhoid is dropped because it is only monthly and short.
+- WHO GHO API verified live (WUENIC MCV1, DTP3, BCG for Sierra Leone); Wikipedia page views fetched as a weekly snapshot.
+- District names come from the same DHIS2 extract as the polygons, so they match (13 districts; the 14/16 discrepancy in other sources does not apply).
+- Still unverified: licence terms for the DHIS2 demo files and the WHO and Wikimedia data (see `DATA.md`); the full WHO case-field list (the plan uses the fields in `RESEARCH.md`).
