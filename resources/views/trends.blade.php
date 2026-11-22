@@ -12,7 +12,7 @@
     </x-chart-card>
 
     <div class="box">
-        <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-table" aria-hidden="true"></i> Weekly values with denominators</h3></div>
+        <div class="box-header with-border"><h2 class="box-title"><i class="fa fa-table" aria-hidden="true"></i> Weekly values with denominators</h2></div>
         <div class="box-body no-padding">
             @include('partials.trend-table', ['tableId' => 'trend-table', 'datatable' => true])
         </div>
@@ -20,12 +20,12 @@
 @endsection
 
 @push('plugin-styles')
-<link rel="stylesheet" href="{{ asset('vendor/datatables/datatables.min.css') }}">
+<link rel="stylesheet" href="{{ asset_ver('vendor/datatables/datatables.min.css') }}">
 @endpush
 @push('plugins')
-<script src="{{ asset('vendor/chartjs/chart.umd.js') }}"></script>
-<script src="{{ asset('js/charts.js') }}"></script>
-<script src="{{ asset('vendor/datatables/datatables.min.js') }}"></script>
+<script src="{{ asset_ver('vendor/chartjs/chart.umd.js') }}"></script>
+<script src="{{ asset_ver('js/charts.js') }}"></script>
+<script src="{{ asset_ver('vendor/datatables/datatables.min.js') }}"></script>
 @endpush
 @push('scripts')
 <script @nonce>

@@ -18,7 +18,7 @@
     </x-chart-card>
 
     <div class="box">
-        <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-flag-o" aria-hidden="true"></i> Flagged weeks <span class="badge badge-muted">{{ $flagged->count() }}</span></h3></div>
+        <div class="box-header with-border"><h2 class="box-title"><i class="fa fa-flag-o" aria-hidden="true"></i> Flagged weeks <span class="badge badge-muted">{{ $flagged->count() }}</span></h2></div>
         <div class="box-body">
             <p class="text-muted">The limits are fixed from the baseline weeks and exclude the most recent 12 weeks, so a growing outbreak cannot widen its own limits.</p>
             @if ($flagged->isEmpty())
@@ -36,8 +36,8 @@
 @endsection
 
 @push('plugins')
-<script src="{{ asset('vendor/chartjs/chart.umd.js') }}"></script>
-<script src="{{ asset('js/charts.js') }}"></script>
+<script src="{{ asset_ver('vendor/chartjs/chart.umd.js') }}"></script>
+<script src="{{ asset_ver('js/charts.js') }}"></script>
 @endpush
 @push('scripts')
 <script @nonce>

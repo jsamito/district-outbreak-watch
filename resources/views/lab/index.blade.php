@@ -2,7 +2,7 @@
 @section('content')
     <div class="ow-notice"><i class="fa fa-lock" aria-hidden="true"></i> You see only what is needed to enter a result. Positive results confirm the case automatically.</div>
     <div class="box">
-        <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-flask" aria-hidden="true"></i> Waiting for a result <span class="badge badge-muted">{{ $pending->count() }}</span></h3></div>
+        <div class="box-header with-border"><h2 class="box-title"><i class="fa fa-flask" aria-hidden="true"></i> Waiting for a result <span class="badge badge-muted">{{ $pending->count() }}</span></h2></div>
         <div class="box-body no-padding">
             @if ($pending->isEmpty())
                 <div class="ow-empty"><i class="fa fa-check-circle text-green" aria-hidden="true"></i><p>No samples are waiting for a result.</p></div>

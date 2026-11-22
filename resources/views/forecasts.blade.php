@@ -30,7 +30,7 @@
             </x-slot:table>
         </x-chart-card>
 
-        <div class="box"><div class="box-header with-border"><h3 class="box-title">How accurate have these projections been?</h3></div>
+        <div class="box"><div class="box-header with-border"><h2 class="box-title">How accurate have these projections been?</h2></div>
             <div class="box-body">
                 <p>Each model was tested on {{ $result['backtest']['origins'] }} past weeks: trained only on data before that week, then compared with what really happened one to four weeks later. Average absolute error per week:</p>
                 <ul>@foreach ($result['backtest']['by_method'] as $m => $mae)<li>{{ \App\Services\Forecaster::METHODS[$m] }}: {{ number_format($mae, 1) }}@if ($m === 'naive') (baseline)@endif</li>@endforeach</ul>
@@ -41,8 +41,8 @@
 
 @if ($result)
 @push('plugins')
-<script src="{{ asset('vendor/chartjs/chart.umd.js') }}"></script>
-<script src="{{ asset('js/charts.js') }}"></script>
+<script src="{{ asset_ver('vendor/chartjs/chart.umd.js') }}"></script>
+<script src="{{ asset_ver('js/charts.js') }}"></script>
 @endpush
 @push('scripts')
 <script @nonce>

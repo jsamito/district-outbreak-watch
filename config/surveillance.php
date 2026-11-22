@@ -8,6 +8,9 @@ return [
     'force_https' => env('SURVEILLANCE_FORCE_HTTPS', env('APP_ENV') === 'production'),
     'hsts' => env('SURVEILLANCE_HSTS', true),
 
+    // Live dashboard updates over WebSockets (needs `php artisan reverb:start`). When off, pages poll a small JSON summary instead.
+    'realtime' => env('SURVEILLANCE_REALTIME', false),
+
     'country' => ['code' => 'UG', 'name' => 'Uganda'],
 
     // Open population data is one projected year per district; other years use a flat growth rate.

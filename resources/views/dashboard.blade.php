@@ -59,7 +59,7 @@
         </div>
         <div class="col-md-4">
             <div class="box">
-                <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-bell-o" aria-hidden="true"></i> Needs attention <span class="badge badge-muted">{{ $attention->count() }}</span></h3>
+                <div class="box-header with-border"><h2 class="box-title"><i class="fa fa-bell-o" aria-hidden="true"></i> Needs attention <span class="badge badge-muted">{{ $attention->count() }}</span></h2>
                     @if (Route::has('alerts.index'))<div class="box-tools pull-right"><a href="{{ route('alerts.index') }}" class="btn btn-box-tool">All alerts</a></div>@endif</div>
                 @if ($attention->isEmpty())
                     <div class="ow-empty" style="padding:28px"><i class="fa fa-check-circle text-green" aria-hidden="true"></i><p>No area is above its outbreak threshold this week.</p></div>
@@ -108,34 +108,62 @@
     </div>
 @endsection
 
-@push('alpine-lib')
-<script defer src="{{ asset('vendor/alpine/alpine.csp.min.js') }}"></script>
-@endpush
 @push('plugins')
-<script src="{{ asset('vendor/pusher/pusher.min.js') }}"></script>
-<script src="{{ asset('vendor/chartjs/chart.umd.js') }}"></script>
-<script src="{{ asset('js/live.js') }}"></script>
-<script src="{{ asset('js/charts.js') }}"></script>
+<script src="{{ asset_ver('vendor/chartjs/chart.umd.js') }}"></script>
+<script src="{{ asset_ver('js/charts.js') }}"></script>
 @endpush
 
 @push('scripts')
 <script @nonce>
 (function () {
     var floor = @js(config('surveillance.small_number_floor'));
-    var rankIsIncidence = @js($rank === 'incidence');
     var charts = {};
+    // Latest data for the ranking chart, so it is correct even if the disease is switched before it scrolls into view.
+    window.owPanel = { rank: @js($rank), top: @js($top->map(fn ($t) => ['name' => $t->name, 'cases' => (float) $t->cases, 'incidence' => $t->incidence === null ? null : round($t->incidence, 1)])->values()) };
     charts.trend = owCharts.line('chart-trend', { labels: @js($trend['labels']), yTitle: 'Cases per week', floor: floor, ariaLabel: @js('Weekly cases of '.$disease->name),
         series: [{ label: 'Weekly cases', data: @js($trend['cases']), signals: @js($trend['signals']) },
                  { label: 'Signal threshold', data: @js($trend['upper']), color: '#6b7682', dashed: true }], points: true });
-    charts.top = owCharts.bar('chart-top', { horizontal: true, labels: @js($top->pluck('name')), yTitle: @js($rank === 'incidence' ? 'Cases per 100,000 people' : 'Cases'), integer: @js($rank !== 'incidence'), floor: floor,
-        ariaLabel: @js('Areas ranked by '.$rank), series: [{ label: @js($rank === 'incidence' ? 'Per 100,000' : 'Cases'), data: @js($top->pluck($rank)->map(fn ($v) => round($v, 1))->values()) }] });
+    owCharts.lazy('chart-top', function () {
+        var p = window.owPanel, inc = p.rank === 'incidence';
+        charts.top = owCharts.bar('chart-top', { horizontal: true, labels: p.top.map(function (t) { return t.name; }), yTitle: inc ? 'Cases per 100,000 people' : 'Cases', integer: !inc, floor: floor,
+            ariaLabel: 'Areas ranked by ' + p.rank, series: [{ label: inc ? 'Per 100,000' : 'Cases', data: p.top.map(function (t) { return inc ? t.incidence : t.cases; }) }] });
+    });
     window.owOverviewCharts = charts;
-    owCharts.line('chart-reporting', { labels: @js(array_keys($reportTrend)), yTitle: 'Reports received (%)', yMax: 100, integer: false, unit: '%', ariaLabel: 'Reporting completeness by week',
-        series: [{ label: 'Completeness', data: @js(array_map(fn ($v) => round($v, 1), array_values($reportTrend))) }] });
+    owCharts.lazy('chart-reporting', function () { owCharts.line('chart-reporting', { labels: @js(array_keys($reportTrend)), yTitle: 'Reports received (%)', yMax: 100, integer: false, unit: '%', ariaLabel: 'Reporting completeness by week',
+        series: [{ label: 'Completeness', data: @js(array_map(fn ($v) => round($v, 1), array_values($reportTrend))) }] }); });
     var vacc = @js($vacc);
-    owCharts.bar('chart-vacc', { labels: vacc.map(function (v) { return v.code; }), yTitle: 'Coverage (%)', yMax: 110, integer: false, unit: '%', ariaLabel: 'Vaccination coverage by vaccine',
+    owCharts.lazy('chart-vacc', function () { owCharts.bar('chart-vacc', { labels: vacc.map(function (v) { return v.code; }), yTitle: 'Coverage (%)', yMax: 110, integer: false, unit: '%', ariaLabel: 'Vaccination coverage by vaccine',
         series: [{ label: 'Coverage', data: vacc.map(function (v) { return v.coverage; }) },
-                 { label: 'Target', data: vacc.map(function (v) { return v.target; }), type: 'line', color: '#d55e00', order: 0 }] });
+                 { label: 'Target', data: vacc.map(function (v) { return v.target; }), type: 'line', color: '#d55e00', order: 0 }] }); });
+}());
+</script>
+@endpush
+
+@push('scripts')
+<script @nonce>
+/* Live updates start after the page has loaded and the browser is idle. */
+owAfterLoad(function () { var s = document.createElement('script'); s.src = @js(asset_ver('js/live.js')); document.head.appendChild(s); });
+</script>
+<script @nonce>
+/* Alpine.js is loaded the first time someone points at, focuses, touches or clicks the disease chips,
+   so the page itself stays light. The chips are ordinary links, so they still work if it is not loaded yet. */
+(function () {
+    var root = document.querySelector('[x-data="overview"]');
+    if (!root) { return; }
+    var src = @js(asset_ver('vendor/alpine/alpine.csp.min.js'));
+    var pending = null;
+    function load(done) {
+        if (window.Alpine) { if (done) { done(); } return; }
+        if (!pending) {
+            pending = new Promise(function (ok) { var s = document.createElement('script'); s.src = src; s.defer = true; s.onload = function () { setTimeout(ok, 30); }; document.head.appendChild(s); });
+        }
+        if (done) { pending.then(done); }
+    }
+    ['pointerenter', 'focusin', 'touchstart'].forEach(function (ev) { root.addEventListener(ev, function () { load(); }, { once: true, passive: true, capture: true }); });
+    root.addEventListener('click', function (e) {
+        var a = e.target.closest ? e.target.closest('.ow-chip') : null;
+        if (a && !window.Alpine) { e.preventDefault(); e.stopPropagation(); load(function () { a.click(); }); }
+    }, true);
 }());
 </script>
 @endpush
@@ -166,6 +194,7 @@ document.addEventListener('alpine:init', function () {
             },
             apply: function (root, d, link) {
                 var c = window.owOverviewCharts;
+                window.owPanel = { rank: d.rank, top: d.top };
                 var floor = @js(config('surveillance.small_number_floor'));
                 c.trend.data.labels = d.trend.labels;
                 var ds = c.trend.data.datasets;
@@ -177,11 +206,13 @@ document.addEventListener('alpine:init', function () {
                 ds[1].data = d.trend.upper;
                 c.trend.update();
                 var isInc = d.rank === 'incidence';
-                c.top.data.labels = d.top.map(function (t) { return t.name; });
-                c.top.data.datasets[0].data = d.top.map(function (t) { return isInc ? t.incidence : t.cases; });
-                c.top.data.datasets[0].label = isInc ? 'Per 100,000' : 'Cases';
-                c.top.options.scales.x.title.text = isInc ? 'Cases per 100,000 people' : 'Cases';
-                c.top.update();
+                if (c.top) {
+                    c.top.data.labels = d.top.map(function (t) { return t.name; });
+                    c.top.data.datasets[0].data = d.top.map(function (t) { return isInc ? t.incidence : t.cases; });
+                    c.top.data.datasets[0].label = isInc ? 'Per 100,000' : 'Cases';
+                    c.top.options.scales.x.title.text = isInc ? 'Cases per 100,000 people' : 'Cases';
+                    c.top.update();
+                }
 
                 document.getElementById('chart-trend-title').textContent = d.disease.name + ': weekly cases, last 52 weeks';
                 document.getElementById('chart-top-title').textContent = d.disease.name + ': ' + (isInc ? 'highest incidence' : 'most cases') + ' in the last 4 weeks';

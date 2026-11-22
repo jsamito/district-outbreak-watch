@@ -12,7 +12,7 @@
     <div class="row">
         <div class="col-md-9">
             <div class="box">
-                <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-bell-o" aria-hidden="true"></i> {{ ucfirst($status) }} alerts</h3></div>
+                <div class="box-header with-border"><h2 class="box-title"><i class="fa fa-bell-o" aria-hidden="true"></i> {{ ucfirst($status) }} alerts</h2></div>
                 <div class="box-body no-padding">
                     @if ($alerts->isEmpty())
                         <div class="ow-empty"><i class="fa fa-check-circle text-green" aria-hidden="true"></i><p>No alerts to show.</p></div>
@@ -41,7 +41,7 @@
         </div>
         <div class="col-md-3">
             <div class="box">
-                <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-envelope-o" aria-hidden="true"></i> Notification preferences</h3></div>
+                <div class="box-header with-border"><h2 class="box-title"><i class="fa fa-envelope-o" aria-hidden="true"></i> Notification preferences</h2></div>
                 <form method="POST" action="{{ route('alerts.preferences') }}" class="box-body">
                     @csrf
                     <div class="radio"><label><input type="radio" name="mode" value="auto" @checked($preference === 'auto')> High severity by email at once; the rest in one daily summary</label></div>
@@ -55,8 +55,8 @@
     </div>
 @endsection
 
-@push('plugin-styles')<link rel="stylesheet" href="{{ asset('vendor/datatables/datatables.min.css') }}">@endpush
-@push('plugins')<script src="{{ asset('vendor/datatables/datatables.min.js') }}"></script>@endpush
+@push('plugin-styles')<link rel="stylesheet" href="{{ asset_ver('vendor/datatables/datatables.min.css') }}">@endpush
+@push('plugins')<script src="{{ asset_ver('vendor/datatables/datatables.min.js') }}"></script>@endpush
 @push('scripts')
 <script @nonce>owRegisterDT('alerts-table', { order: [[0, 'asc'], [3, 'desc']], pageLength: 15 });</script>
 @endpush

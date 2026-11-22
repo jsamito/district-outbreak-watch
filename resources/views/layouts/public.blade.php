@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/svg+xml" href="{{ asset_ver('favicon.svg') }}">
     <title>@yield('title', config('app.name')) · {{ config('app.name') }}</title>
     <meta name="description" content="@yield('description', 'Disease surveillance for district and national health teams in Uganda: weekly counts, alerts and projections for notifiable diseases.')">
     <link rel="canonical" href="{{ url()->current() }}">
@@ -12,9 +13,9 @@
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:image" content="{{ route('share.png') }}">
     <meta name="twitter:card" content="summary_large_image">
-    <link rel="stylesheet" href="{{ asset('vendor/bootstrap/css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('vendor/fontawesome/css/font-awesome.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <link rel="stylesheet" href="{{ asset_ver('vendor/bootstrap/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ asset_ver('vendor/fontawesome/css/font-awesome.min.css') }}">
+    <link rel="stylesheet" href="{{ asset_ver('css/app.css') }}">
     <script type="application/ld+json" @nonce>{!! json_encode(['@context' => 'https://schema.org', '@type' => 'WebSite', 'name' => config('app.name'), 'url' => url('/'), 'inLanguage' => 'en'], JSON_UNESCAPED_SLASHES) !!}</script>
     @stack('head')
 </head>

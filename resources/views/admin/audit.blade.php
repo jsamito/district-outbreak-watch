@@ -3,11 +3,11 @@
 @section('content')
     <div class="row">
         <div class="col-md-5">
-            <div class="box"><div class="box-header with-border"><h3 class="box-title"><i class="fa fa-bar-chart" aria-hidden="true"></i> Activity, last 30 days</h3></div>
+            <div class="box"><div class="box-header with-border"><h2 class="box-title"><i class="fa fa-bar-chart" aria-hidden="true"></i> Activity, last 30 days</h2></div>
                 <div class="box-body no-padding"><table class="table table-condensed"><thead><tr><th scope="col">Type</th><th scope="col">Action</th><th scope="col" class="text-right">Count</th></tr></thead><tbody>
                     @foreach ($summary as $s)<tr><td>{{ $s->category }}</td><td>{{ str_replace('_', ' ', $s->action) }}</td><td class="text-right">{{ number_format($s->n) }}</td></tr>@endforeach
                 </tbody></table></div></div>
-            <div class="box"><div class="box-header with-border"><h3 class="box-title"><i class="fa fa-users" aria-hidden="true"></i> Most active users</h3></div>
+            <div class="box"><div class="box-header with-border"><h2 class="box-title"><i class="fa fa-users" aria-hidden="true"></i> Most active users</h2></div>
                 <ul class="ow-list">@foreach ($topUsers as $t)<li><span class="ow-list-main">{{ $t->user?->name ?? 'Deleted user' }}</span><span class="ow-list-val">{{ number_format($t->n) }}</span></li>@endforeach</ul></div>
         </div>
         @if ($full)

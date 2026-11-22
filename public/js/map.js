@@ -14,7 +14,7 @@ window.owMap = function (elId, cfg) {
         for (var i = 0; i < breaks.length; i++) { if (v <= breaks[i]) { return scale[i]; } }
         return scale[4];
     }
-    var map = L.map(el, { zoomControl: true, attributionControl: false, scrollWheelZoom: false, keyboard: true });
+    var map = L.map(el, { zoomControl: true, attributionControl: false, scrollWheelZoom: false, keyboard: true, preferCanvas: true });
     var info = L.control({ position: 'topright' });
     info.onAdd = function () { this._div = L.DomUtil.create('div', 'ow-map-info'); this.update(); return this._div; };
     info.update = function (p) { this._div.innerHTML = p ? '<strong>' + p.name + '</strong><br>' + (values[p.id] ? values[p.id].label : 'No data') : 'Hover over or select a district'; };

@@ -42,8 +42,8 @@
 @endsection
 
 @push('plugins')
-<script src="{{ asset('vendor/chartjs/chart.umd.js') }}"></script>
-<script src="{{ asset('js/charts.js') }}"></script>
+<script src="{{ asset_ver('vendor/chartjs/chart.umd.js') }}"></script>
+<script src="{{ asset_ver('js/charts.js') }}"></script>
 @endpush
 @push('scripts')
 <script @nonce>

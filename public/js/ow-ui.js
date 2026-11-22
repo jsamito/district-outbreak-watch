@@ -5,14 +5,35 @@
 (function ($) {
     'use strict';
 
-    /* ── Toastr ─────────────────────────────────────────── */
-    if (window.toastr) {
-        toastr.options = {
-            closeButton: true, progressBar: true, positionClass: 'toast-top-right',
-            timeOut: 4500, extendedTimeOut: 1500, showMethod: 'fadeIn', hideMethod: 'fadeOut'
-        };
+    /* The sidebar scrolls natively; AdminLTE's fixed layout only checks that this plugin exists. */
+    if (!$.fn.slimscroll) { $.fn.slimscroll = $.fn.slimScroll = function () { return this; }; }
+
+    /* ── Lazy libraries: select2, datepicker and toastr load after the page is usable ── */
+    var assetMap = {};
+    try { assetMap = JSON.parse((document.querySelector('meta[name="assets"]') || {}).content || '{}'); } catch (e) { assetMap = {}; }
+    var libs = {};
+    function addCss(href) { var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = href; document.head.appendChild(l); }
+    function addJs(src) { return new Promise(function (ok, fail) { var s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = fail; document.head.appendChild(s); }); }
+    window.owLib = function (name) {
+        if (!libs[name]) {
+            var a = assetMap[name];
+            if (!a) { libs[name] = Promise.resolve(); } else { addCss(a[0]); libs[name] = addJs(a[1]); }
+        }
+        return libs[name];
+    };
+    window.owAfterLoad = afterLoad;
+    function afterLoad(fn) {
+        var run = function () { (window.requestIdleCallback || function (f) { setTimeout(f, 300); })(fn, { timeout: 4000 }); };
+        if (document.readyState === 'complete') { run(); } else { window.addEventListener('load', run); }
     }
-    window.owToast = function (type, message) { if (window.toastr) { toastr[type || 'info'](message); } };
+
+    /* ── Toastr ─────────────────────────────────────────── */
+    window.owToast = function (type, message) {
+        owLib('toastr').then(function () {
+            toastr.options = { closeButton: true, progressBar: true, positionClass: 'toast-top-right', timeOut: 4500, extendedTimeOut: 1500, showMethod: 'fadeIn', hideMethod: 'fadeOut' };
+            toastr[type || 'info'](message);
+        });
+    };
 
     /* Bootstrap 5 Modal shim required by the DataTables bs5 bundle */
     window.bootstrap = window.bootstrap || {};
@@ -122,7 +143,15 @@
         var merged = $.extend(true, {}, defaults, opts);
         if (opts && opts.buttons) { merged.buttons = opts.buttons; }
         registry[id] = merged;
-        window.owInitDT(id);
+        var el = document.getElementById(id);
+        if (el && 'IntersectionObserver' in window) {
+            var io = new IntersectionObserver(function (entries) {
+                if (entries.some(function (e) { return e.isIntersecting; })) { io.disconnect(); setTimeout(function () { window.owInitDT(id); }, 0); }
+            }, { rootMargin: '300px' });
+            io.observe(el);
+        } else {
+            window.owInitDT(id);
+        }
     };
     window.owInitDT = function (id) {
         if (!$.fn.DataTable) { return; }
@@ -165,11 +194,20 @@
         this.form.submit();
     });
 
+    /* Controls look native until first used; they are upgraded the moment someone points at, focuses or touches them. */
+    function upgrade(el) {
+        var $el = $(el);
+        if ($el.is('select.ow-select2')) {
+            owLib('select2').then(function () { owInitSelect2($el.parent()); });
+        } else if ($el.is('input.ow-datepicker')) {
+            owLib('datepicker').then(function () { owInitDatepickers($el.parent()); });
+        }
+    }
+    $(document).on('pointerenter focusin touchstart', 'select.ow-select2, input.ow-datepicker', function () { upgrade(this); });
+
     $(function () {
-        window.owInitSelect2();
-        window.owInitDatepickers();
         syncSidebarState();
         var flash = document.querySelector('meta[name="flash-status"]');
-        if (flash && flash.content) { window.owToast('success', flash.content); }
+        if (flash && flash.content) { afterLoad(function () { window.owToast('success', flash.content); }); }
     });
 }(window.jQuery));

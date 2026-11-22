@@ -509,3 +509,13 @@ main:focus { outline: none; }
 .select2-container--default .select2-selection--single { background: #fff; }
 .select2-dropdown { z-index: 2100; }
 .select2-container--default .select2-search--dropdown .select2-search__field { min-height: 32px; }
+
+/* Links inside running text must not rely on colour alone (WCAG 1.4.1) */
+.content p a:not(.btn), .content li a:not(.btn):not(.ow-chip), .content td a:not(.btn), .ow-notice a, .ow-banner a, .ow-caption a, .help-block a, .main-footer a,
+.ow-public main p a:not(.btn), .ow-public main li a, .ow-public main td a, .ow-public main th a, .ow-public__footer a { text-decoration: underline; text-underline-offset: 2px; }
+
+/* Footer and table-info text meet AA contrast; the sidebar scrolls natively (no slimScroll) */
+.main-footer { background: #fff; color: var(--ink-2); border-top: 1px solid var(--line); }
+.main-footer a { color: var(--accent-d); }
+div.dataTables_wrapper div.dataTables_info { color: var(--muted); }
+.fixed .main-sidebar .sidebar { overflow-y: auto; max-height: calc(100vh - 50px); }

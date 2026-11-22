@@ -7,7 +7,7 @@
     <div class="row ow-eq">
         <div class="col-md-7">
             <div class="box">
-                <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-map-o" aria-hidden="true"></i> {{ $disease->name }} by district</h3></div>
+                <div class="box-header with-border"><h2 class="box-title"><i class="fa fa-map-o" aria-hidden="true"></i> {{ $disease->name }} by district</h2></div>
                 <div class="box-body">
                     <div id="district-map" class="ow-map" role="region" aria-label="Map of {{ $disease->name }} by district. The table beside it lists the same values."></div>
                     <p class="ow-caption">Period {{ $from->format('d M Y') }} to {{ $to->format('d M Y') }}. Darker districts have a higher {{ $metric === 'incidence' ? 'incidence per 100,000 people' : 'number of cases' }}. Districts outlined in vermillion are above their outbreak threshold in the latest week. Select a district to drill down.</p>
@@ -21,7 +21,7 @@
     </div>
 
     <div class="box">
-        <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-table" aria-hidden="true"></i> Districts</h3></div>
+        <div class="box-header with-border"><h2 class="box-title"><i class="fa fa-table" aria-hidden="true"></i> Districts</h2></div>
         <div class="box-body no-padding">
             <table id="district-table" class="table table-hover table-condensed">
                 <caption class="sr-only">Cases, population and incidence by district</caption>
@@ -43,7 +43,7 @@
 
     @if ($facilities->isNotEmpty())
     <div class="box">
-        <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-hospital-o" aria-hidden="true"></i> Reporting facilities in {{ $mapRoot->name }}</h3></div>
+        <div class="box-header with-border"><h2 class="box-title"><i class="fa fa-hospital-o" aria-hidden="true"></i> Reporting facilities in {{ $mapRoot->name }}</h2></div>
         <div class="box-body no-padding">
             <table id="facility-table" class="table table-hover table-condensed">
                 <caption class="sr-only">Cases and reporting completeness by facility</caption>
@@ -60,15 +60,15 @@
 @endsection
 
 @push('plugin-styles')
-<link rel="stylesheet" href="{{ asset('vendor/leaflet/leaflet.css') }}">
-<link rel="stylesheet" href="{{ asset('vendor/datatables/datatables.min.css') }}">
+<link rel="stylesheet" href="{{ asset_ver('vendor/leaflet/leaflet.css') }}">
+<link rel="stylesheet" href="{{ asset_ver('vendor/datatables/datatables.min.css') }}">
 @endpush
 @push('plugins')
-<script src="{{ asset('vendor/chartjs/chart.umd.js') }}"></script>
-<script src="{{ asset('js/charts.js') }}"></script>
-<script src="{{ asset('vendor/leaflet/leaflet.js') }}"></script>
-<script src="{{ asset('js/map.js') }}"></script>
-<script src="{{ asset('vendor/datatables/datatables.min.js') }}"></script>
+<script src="{{ asset_ver('vendor/chartjs/chart.umd.js') }}"></script>
+<script src="{{ asset_ver('js/charts.js') }}"></script>
+<script src="{{ asset_ver('vendor/leaflet/leaflet.js') }}"></script>
+<script src="{{ asset_ver('js/map.js') }}"></script>
+<script src="{{ asset_ver('vendor/datatables/datatables.min.js') }}"></script>
 @endpush
 @push('scripts')
 <script @nonce>
@@ -78,9 +78,9 @@
         legendTitle: @js($metric === 'incidence' ? 'Cases per 100,000' : 'Cases'), linkBase: base });
     var top = @js($sorted->take(15)->values());
     var metric = @js($metric);
-    owCharts.bar('chart-districts', { horizontal: true, labels: top.map(function (r) { return r.name; }), yTitle: metric === 'incidence' ? 'Cases per 100,000 people' : 'Cases', integer: metric !== 'incidence',
+    owCharts.lazy('chart-districts', function () { owCharts.bar('chart-districts', { horizontal: true, labels: top.map(function (r) { return r.name; }), yTitle: metric === 'incidence' ? 'Cases per 100,000 people' : 'Cases', integer: metric !== 'incidence',
         floor: @js(config('surveillance.small_number_floor')), ariaLabel: 'Districts ranked', onClick: function (i) { window.location = base + top[i].id; },
-        series: [{ label: metric === 'incidence' ? 'Per 100,000' : 'Cases', data: top.map(function (r) { return Math.round((metric === 'incidence' ? r.incidence : r.cases) * 10) / 10; }) }] });
+        series: [{ label: metric === 'incidence' ? 'Per 100,000' : 'Cases', data: top.map(function (r) { return Math.round((metric === 'incidence' ? r.incidence : r.cases) * 10) / 10; }) }] }); });
     owRegisterDT('district-table', { order: [[3, 'desc']], pageLength: 15 });
     owRegisterDT('facility-table', { order: [[1, 'desc']], pageLength: 10 });
 }());

@@ -24,7 +24,7 @@
         </div>
     </form>
 
-    <div class="box"><div class="box-header with-border"><h3 class="box-title">What the files contain</h3></div>
+    <div class="box"><div class="box-header with-border"><h2 class="box-title">What the files contain</h2></div>
         <div class="box-body">
             <ul>
                 <li><strong>Weekly cases:</strong> area, disease with ICD-10 code, week, cases, population, incidence per 100,000 and a small-number flag.</li>

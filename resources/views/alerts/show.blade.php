@@ -16,7 +16,7 @@
         </div>
         <div class="col-md-4">
             <div class="box">
-                <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-check-square-o" aria-hidden="true"></i> Response</h3></div>
+                <div class="box-header with-border"><h2 class="box-title"><i class="fa fa-check-square-o" aria-hidden="true"></i> Response</h2></div>
                 <div class="box-body">
                     @if ($alert->acknowledged_at)
                         <p><i class="fa fa-check-circle text-green" aria-hidden="true"></i> Acknowledged by <strong>{{ $alert->acknowledger?->name ?? 'a user' }}</strong> on {{ $alert->acknowledged_at->format('d M Y H:i') }}.</p>
@@ -39,7 +39,7 @@
                 </div>
             </div>
             <div class="box">
-                <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-history" aria-hidden="true"></i> Timeline</h3></div>
+                <div class="box-header with-border"><h2 class="box-title"><i class="fa fa-history" aria-hidden="true"></i> Timeline</h2></div>
                 <ul class="ow-list">
                     <li><i class="fa fa-flag text-muted" aria-hidden="true"></i><span class="ow-list-main">Signalled<small>{{ $alert->triggered_at->format('d M Y H:i') }}</small></span></li>
                     @if ($alert->escalated_at)<li><i class="fa fa-arrow-up text-muted" aria-hidden="true"></i><span class="ow-list-main">Escalated to level {{ $alert->escalation_level }}<small>{{ $alert->escalated_at->format('d M Y H:i') }}</small></span></li>@endif
@@ -55,8 +55,8 @@
 @endsection
 
 @push('plugins')
-<script src="{{ asset('vendor/chartjs/chart.umd.js') }}"></script>
-<script src="{{ asset('js/charts.js') }}"></script>
+<script src="{{ asset_ver('vendor/chartjs/chart.umd.js') }}"></script>
+<script src="{{ asset_ver('js/charts.js') }}"></script>
 @endpush
 @push('scripts')
 <script @nonce>

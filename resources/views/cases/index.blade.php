@@ -25,7 +25,7 @@
     </form>
 
     <div class="box">
-        <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-user-o" aria-hidden="true"></i> {{ number_format($cases->total()) }} cases</h3></div>
+        <div class="box-header with-border"><h2 class="box-title"><i class="fa fa-user-o" aria-hidden="true"></i> {{ number_format($cases->total()) }} cases</h2></div>
         <div class="box-body no-padding">
             <table class="table table-hover">
                 <caption class="sr-only">Cases</caption>

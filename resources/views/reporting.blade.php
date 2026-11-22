@@ -21,7 +21,7 @@
         summary="Share of expected weekly reports received in the area. Counts in other pages are only as reliable as this reporting."/>
 
     <div class="box">
-        <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-th" aria-hidden="true"></i> {{ $area->type === 'district' ? 'Facilities' : 'Areas' }} by week (lowest completeness first)</h3></div>
+        <div class="box-header with-border"><h2 class="box-title"><i class="fa fa-th" aria-hidden="true"></i> {{ $area->type === 'district' ? 'Facilities' : 'Areas' }} by week (lowest completeness first)</h2></div>
         <div class="box-body" style="overflow-x:auto">
             @if ($children->isEmpty())
                 <div class="ow-empty"><p>No reporting units below this area.</p></div>
@@ -47,8 +47,8 @@
 @endsection
 
 @push('plugins')
-<script src="{{ asset('vendor/chartjs/chart.umd.js') }}"></script>
-<script src="{{ asset('js/charts.js') }}"></script>
+<script src="{{ asset_ver('vendor/chartjs/chart.umd.js') }}"></script>
+<script src="{{ asset_ver('js/charts.js') }}"></script>
 @endpush
 @push('scripts')
 <script @nonce>

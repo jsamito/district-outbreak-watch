@@ -4,9 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" type="image/svg+xml" href="{{ asset_ver('favicon.svg') }}">
     <title>Sign in · {{ config('app.name') }}</title>
-    <link rel="stylesheet" href="{{ asset('vendor/fontawesome/css/font-awesome.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <link rel="stylesheet" href="{{ asset_ver('vendor/fontawesome/css/font-awesome.min.css') }}">
+    <link rel="stylesheet" href="{{ asset_ver('css/app.css') }}">
 </head>
 <body class="ow-login">
 <a class="ow-skip-link" href="#main">Skip to the sign-in form</a>
@@ -51,6 +52,6 @@
         </div>
     </main>
 </div>
-<script src="{{ asset('js/login.js') }}"></script>
+<script src="{{ asset_ver('js/login.js') }}"></script>
 </body>
 </html>

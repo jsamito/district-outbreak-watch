@@ -15,7 +15,7 @@
     <div class="row ow-eq">
         <div class="col-md-5">
             <div class="box">
-                <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-id-card-o" aria-hidden="true"></i> Person</h3></div>
+                <div class="box-header with-border"><h2 class="box-title"><i class="fa fa-id-card-o" aria-hidden="true"></i> Person</h2></div>
                 <div class="box-body">
                     <dl class="ow-dl">
                         <dt>Reference</dt><dd><code>{{ $case->person->pseudonym }}</code></dd>
@@ -32,7 +32,7 @@
             </div>
             @if ($full)
             <div class="box">
-                <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-medkit" aria-hidden="true"></i> Vaccination history</h3></div>
+                <div class="box-header with-border"><h2 class="box-title"><i class="fa fa-medkit" aria-hidden="true"></i> Vaccination history</h2></div>
                 <div class="box-body">
                     @forelse ($vaccinations as $v)<p>{{ $v->antigen->name }}, dose {{ $v->dose_number }}, {{ $v->administered_on->format('d M Y') }}</p>@empty<p class="text-muted">No vaccination recorded.</p>@endforelse
                 </div>
@@ -43,7 +43,7 @@
         <div class="col-md-7">
             @if ($canEdit)
             <div class="box">
-                <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-pencil" aria-hidden="true"></i> Update investigation</h3></div>
+                <div class="box-header with-border"><h2 class="box-title"><i class="fa fa-pencil" aria-hidden="true"></i> Update investigation</h2></div>
                 <form method="POST" action="{{ route('cases.update', $case) }}" class="box-body">
                     @csrf @method('PUT')
                     <div class="row">
@@ -59,7 +59,7 @@
             @endif
 
             <div class="box">
-                <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-flask" aria-hidden="true"></i> Laboratory</h3></div>
+                <div class="box-header with-border"><h2 class="box-title"><i class="fa fa-flask" aria-hidden="true"></i> Laboratory</h2></div>
                 <div class="box-body no-padding">
                     <table class="table table-condensed"><thead><tr><th scope="col">Test</th><th scope="col">Specimen</th><th scope="col">Collected</th><th scope="col">Result</th></tr></thead><tbody>
                         @forelse ($case->labResults as $l)<tr><td>{{ $l->test_code }}</td><td>{{ $l->specimen_type }}</td><td>{{ $full ? $l->collected_at->format('d M Y') : 'n/a' }}</td><td>{{ ucfirst($l->result) }}</td></tr>@empty<tr><td colspan="4" class="text-muted">No laboratory tests.</td></tr>@endforelse
@@ -79,7 +79,7 @@
             </div>
 
             <div class="box">
-                <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-history" aria-hidden="true"></i> Timeline</h3></div>
+                <div class="box-header with-border"><h2 class="box-title"><i class="fa fa-history" aria-hidden="true"></i> Timeline</h2></div>
                 <ul class="ow-list">
                     @foreach ($case->events->sortByDesc('occurred_at') as $e)
                         <li><i class="fa fa-circle-o text-muted" aria-hidden="true"></i>

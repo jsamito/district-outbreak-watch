@@ -3,7 +3,7 @@
 @section('content')
     <form method="POST" action="{{ route('cases.store') }}" class="box" novalidate>
         @csrf
-        <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-plus-square-o" aria-hidden="true"></i> New notification</h3></div>
+        <div class="box-header with-border"><h2 class="box-title"><i class="fa fa-plus-square-o" aria-hidden="true"></i> New notification</h2></div>
         <div class="box-body">
             @if ($errors->any())<div class="alert alert-danger" role="alert"><strong>Please correct the following:</strong><ul style="margin:6px 0 0">@foreach ($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul></div>@endif
             <p class="text-muted">Do not enter names, addresses or phone numbers. Only the details below are needed.</p>

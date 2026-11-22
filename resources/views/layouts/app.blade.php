@@ -15,20 +15,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="robots" content="noindex, nofollow">
-    @if ($reverbConfig)<meta name="reverb" content='@json($reverbConfig)'>@endif
-    <meta name="vendor-base" content="{{ asset('vendor/datatables') }}/">
+    @if ($reverbConfig && config('surveillance.realtime'))<meta name="reverb" content='@json($reverbConfig)'>@endif
+    <meta name="vendor-base" content="{{ asset_ver('vendor/datatables') }}/">
     @if (session('status'))<meta name="flash-status" content="{{ session('status') }}">@endif
+    <link rel="icon" type="image/svg+xml" href="{{ asset_ver('favicon.svg') }}">
     <title>{{ $pageTitle }} · {{ $appName }}</title>
 
-    <link rel="stylesheet" href="{{ asset('vendor/bootstrap/css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('vendor/fontawesome/css/font-awesome.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('vendor/adminlte/css/AdminLTE.css') }}">
-    <link rel="stylesheet" href="{{ asset('vendor/adminlte/css/skins/skin-blue.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('vendor/select2/select2.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('vendor/datepicker/datepicker3.css') }}">
-    <link rel="stylesheet" href="{{ asset('vendor/toastr/toastr.min.css') }}">
+    <link rel="stylesheet" href="{{ asset_ver('vendor/bootstrap/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ asset_ver('vendor/fontawesome/css/font-awesome.min.css') }}">
+    <link rel="stylesheet" href="{{ asset_ver('vendor/adminlte/css/AdminLTE.min.css') }}">
+    <link rel="stylesheet" href="{{ asset_ver('vendor/adminlte/css/skins/skin-blue.min.css') }}">
     @stack('plugin-styles')
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <link rel="stylesheet" href="{{ asset_ver('css/app.css') }}">
     @stack('styles')
 </head>
 <body class="hold-transition skin-blue sidebar-mini fixed">
@@ -54,7 +52,7 @@
                     @endif
                     @stack('navbar-items')
                     <li class="dropdown user user-menu">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" aria-label="{{ $user->name }} account menu">
                             <span class="ow-avatar" aria-hidden="true">{{ $initial }}</span>
                             <span class="hidden-xs" style="margin-left:7px">{{ $user->name }}</span>
                         </a>
@@ -118,17 +116,13 @@
 @stack('alpine')
 @stack('alpine-lib')
 
-<script src="{{ asset('vendor/jquery/jquery.min.js') }}"></script>
-<script src="{{ asset('vendor/bootstrap/js/bootstrap.min.js') }}"></script>
-<script src="{{ asset('vendor/slimscroll/jquery.slimscroll.min.js') }}"></script>
-<script src="{{ asset('vendor/fastclick/fastclick.min.js') }}"></script>
-<script src="{{ asset('vendor/adminlte/js/app.min.js') }}"></script>
-<script src="{{ asset('vendor/select2/select2.min.js') }}"></script>
-<script src="{{ asset('vendor/datepicker/bootstrap-datepicker.js') }}"></script>
-<script src="{{ asset('vendor/toastr/toastr.min.js') }}"></script>
+<script src="{{ asset_ver('vendor/jquery/jquery.min.js') }}"></script>
+<script src="{{ asset_ver('vendor/bootstrap/js/bootstrap.min.js') }}"></script>
+<script @nonce>window.AdminLTEOptions = { sidebarSlimScroll: false, enableFastclick: false, enableBoxRefresh: false, enableBSToppltip: false, enableControlSidebar: false, navbarMenuSlimscroll: false, directChat: { enable: false }, animationSpeed: 150 };</script>
+<script src="{{ asset_ver('vendor/adminlte/js/app.min.js') }}"></script>
 @stack('plugins')
 <script @nonce>window.owTitle = @js($pageTitle . ' · ' . $appName);</script>
-<script src="{{ asset('js/ow-ui.js') }}"></script>
+<script src="{{ asset_ver('js/ow-ui.js') }}"></script>
 @stack('scripts')
 </body>
 </html>

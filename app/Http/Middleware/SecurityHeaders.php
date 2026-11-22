@@ -22,7 +22,7 @@ class SecurityHeaders
         $nonce = app(Csp::class)->nonce();
 
         $connect = ["'self'"];
-        if (config('broadcasting.default') === 'reverb') {
+        if (config('surveillance.realtime') && config('broadcasting.default') === 'reverb') {
             $host = env('REVERB_HOST', $request->getHost());
             $port = (int) env('REVERB_PORT', 8080);
             $ws = env('REVERB_SCHEME', 'http') === 'https' ? 'wss' : 'ws';

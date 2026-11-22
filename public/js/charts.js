@@ -11,6 +11,8 @@ window.owCharts = (function () {
         Chart.defaults.font.family = getComputedStyle(document.body).fontFamily;
         Chart.defaults.font.size = 12;
         Chart.defaults.color = '#3f4a59';
+        Chart.defaults.animation = false;
+        Chart.defaults.devicePixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
         Chart.defaults.borderColor = '#e4e7eb';
         return true;
     }
@@ -150,5 +152,16 @@ window.owCharts = (function () {
         });
     }
 
-    return { line: line, bar: bar, uchart: uchart, forecast: forecast, fmt: fmt };
+    /* Build a chart only when its canvas is about to scroll into view, in its own task. */
+    function lazy(id, build) {
+        var el = document.getElementById(id);
+        if (!el) { return; }
+        if (!('IntersectionObserver' in window)) { build(); return; }
+        var io = new IntersectionObserver(function (entries) {
+            if (entries.some(function (e) { return e.isIntersecting; })) { io.disconnect(); setTimeout(build, 0); }
+        }, { rootMargin: '200px' });
+        io.observe(el);
+    }
+
+    return { line: line, bar: bar, uchart: uchart, forecast: forecast, lazy: lazy, fmt: fmt };
 }());
