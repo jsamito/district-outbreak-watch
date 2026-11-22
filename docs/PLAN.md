@@ -496,3 +496,4 @@ Use Chart.js 4. Check which version your AdminLTE copy ships; your reference pro
 - **API clients** are registered on an admin screen as well as on the command line.
 - **Wireframes and prototype:** the screens were built directly in the AdminLTE shell, so the working system serves as the prototype. Wireframes, design rules and the five-person usability test script are in `docs/DESIGN.md`; the test itself has not been run yet.
 - **Email** is configured through `.env`; the DNS records and checks are in `docs/DEPLOYMENT.md` and have not yet been run on a live domain.
+- **Roles added after the plan:** `super_admin` (every permission; Amito only in the live installation) and `regional_officer` (one region, pseudonymised cases). Temporary passwords are forced to change at first sign-in. The install command asks for confirmation before erasing a database.

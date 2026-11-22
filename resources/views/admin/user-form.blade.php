@@ -4,6 +4,7 @@
         'super_admin' => 'Full access to every screen and every area: users, rules, API clients, data quality, cases, labs, alerts and exports.',
         'system_admin' => 'Manages users, data sources, API clients and alert rules. Sees no case records.',
         'national_manager' => 'Sees every area: charts, alerts, forecasts and exports. Acknowledges alerts and manages rules.',
+        'regional_officer' => 'Sees charts, forecasts, alerts and pseudonymised case lists for every district in the assigned region. Acknowledges alerts.',
         'epidemiologist' => 'Sees charts, forecasts and pseudonymised case lists (no names, facilities or exact dates).',
         'district_officer' => 'Sees full case detail in the assigned district, notifies cases, enters lab results, acknowledges alerts.',
         'clinician' => 'Notifies and updates cases in the assigned facility or district and receives alerts.',

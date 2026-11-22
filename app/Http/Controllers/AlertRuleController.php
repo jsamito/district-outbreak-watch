@@ -61,7 +61,7 @@ class AlertRuleController extends Controller
             'method' => ['required', 'in:'.implode(',', array_keys(AlertRule::METHODS))], 'severity' => ['required', 'in:auto,high,medium,low'],
             'min_count' => ['required', 'integer', 'min:1', 'max:1000'], 'cooldown_hours' => ['required', 'integer', 'min:1', 'max:2160'],
             'escalate_after_minutes' => ['nullable', 'integer', 'min:15', 'max:10080'], 'baseline_weeks' => ['nullable', 'integer', 'min:4', 'max:26'], 'threshold' => ['required_if:method,threshold', 'nullable', 'integer', 'min:1', 'max:100000'],
-            'cluster_days' => ['required_if:method,cluster', 'nullable', 'integer', 'min:3', 'max:60'], 'sigmas' => ['nullable', 'numeric', 'min:1', 'max:6'], 'audience_roles' => ['required', 'array', 'min:1'], 'audience_roles.*' => ['in:super_admin,national_manager,district_officer,clinician'],
+            'cluster_days' => ['required_if:method,cluster', 'nullable', 'integer', 'min:3', 'max:60'], 'sigmas' => ['nullable', 'numeric', 'min:1', 'max:6'], 'audience_roles' => ['required', 'array', 'min:1'], 'audience_roles.*' => ['in:super_admin,national_manager,regional_officer,district_officer,clinician'],
         ]);
 
         return [

@@ -234,26 +234,52 @@ class CoreGapsTest extends TestCase
 
     public function test_production_users_are_created_once_and_keep_changed_passwords(): void
     {
-        \App\Models\OrgUnit::factory()->childOf($this->region, 'district')->create(['code' => 'UG3083', 'name' => 'Lira']);
-        $lira = \App\Models\OrgUnit::where('code', 'UG3083')->first();
+        $north = \App\Models\OrgUnit::factory()->childOf($this->country, 'region')->create(['code' => 'UG3', 'name' => 'Northern']);
+        $lira = \App\Models\OrgUnit::factory()->childOf($north, 'district')->create(['code' => 'UG3083', 'name' => 'Lira']);
         \App\Models\OrgUnit::factory()->childOf($lira, 'facility')->create(['code' => 'F11073118391', 'name' => 'Lira Regional Referral Hospital']);
         $this->country->update(['code' => 'UG']);
 
         $this->seed(\Database\Seeders\ProductionUsersSeeder::class);
-        $this->assertSame(7, \App\Models\User::where('email', 'like', '%@joseneous.com')->count());
-        foreach (['amito', 'janet', 'susan'] as $n) {
-            $u = \App\Models\User::where('email', "$n@joseneous.com")->first();
-            $this->assertTrue($u->hasRole('super_admin'));
-            $this->assertSame(['Uganda'], $u->orgUnits->pluck('name')->all() ?: ['Uganda'], 'country scope');
-            $this->assertCount(18, $u->getAllPermissions());
+        $users = \App\Models\User::where('email', 'like', '%@gmail.com')->get()->keyBy('email');
+        $this->assertCount(6, $users);
+        $this->assertSame(['amito@gmail.com'], \App\Models\User::role('super_admin')->pluck('email')->all(), 'Amito is the only super user');
+        $this->assertCount(18, $users['amito@gmail.com']->getAllPermissions());
+        $this->assertTrue($users['susan@gmail.com']->hasRole('district_officer'));
+        $this->assertSame('Lira', $users['susan@gmail.com']->orgUnits->first()->name);
+        $this->assertTrue($users['janet@gmail.com']->hasRole('regional_officer'));
+        $this->assertSame('Northern', $users['janet@gmail.com']->orgUnits->first()->name);
+        foreach ($users as $u) {
             $this->assertTrue($u->must_change_password);
+            $this->assertTrue(\Illuminate\Support\Facades\Hash::check('Admin@123', $u->password));
         }
-        $this->assertSame('Lira', \App\Models\User::where('email', 'dho.lira@joseneous.com')->first()->orgUnits->first()->name);
 
-        $amito = \App\Models\User::where('email', 'amito@joseneous.com')->first();
+        $amito = $users['amito@gmail.com'];
         $amito->forceFill(['password' => \Illuminate\Support\Facades\Hash::make('My-Own-Password-2026'), 'must_change_password' => false])->save();
         $this->seed(\Database\Seeders\ProductionUsersSeeder::class);
         $this->assertTrue(\Illuminate\Support\Facades\Hash::check('My-Own-Password-2026', $amito->fresh()->password), 're-running never resets a password');
         $this->assertFalse($amito->fresh()->must_change_password);
+    }
+
+    public function test_regional_officer_sees_their_region_only(): void
+    {
+        $this->notify($this->facA1);
+        $other = \App\Models\OrgUnit::factory()->childOf($this->country, 'region')->create(['name' => 'Elsewhere']);
+        $u = $this->userFor('regional_officer', $this->region);
+        foreach (['dashboard', 'trends', 'map', 'forecasts', 'alerts.index', 'cases.index', 'cases.analytics', 'quality-flags.index', 'exports.index'] as $name) {
+            $this->actingAs($u)->get(route($name))->assertOk();
+        }
+        $this->actingAs($u)->get(route('areas.show', $this->districtB))->assertOk();
+        $this->actingAs($u)->get(route('areas.show', $other))->assertForbidden();
+        $this->actingAs($u)->get(route('areas.show', $this->country))->assertForbidden();
+        $this->actingAs($u)->get(route('cases.create'))->assertForbidden();
+        $this->actingAs($u)->get(route('admin.users'))->assertForbidden();
+    }
+
+    public function test_reporting_heatmap_separates_on_time_late_and_missing_for_facilities(): void
+    {
+        DB::table('reporting_statuses')->where(['org_unit_id' => $this->facA1->id, 'week_start' => $this->lastWeek->toDateString()])->update(['received' => true, 'on_time' => false]);
+        DB::table('reporting_statuses')->where(['org_unit_id' => $this->facA2->id, 'week_start' => $this->lastWeek->toDateString()])->update(['received' => false, 'on_time' => false]);
+        $res = $this->actingAs($this->userFor('district_officer', $this->districtA))->get(route('reporting'))->assertOk();
+        $res->assertSee('>Late<', false)->assertSee('>Missing<', false)->assertSee('>On time<', false);
     }
 }

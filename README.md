@@ -43,6 +43,7 @@ Built with Laravel 13, AdminLTE 2 (CSS), Chart.js, Leaflet, Alpine.js and Larave
 |---|---|
 | `super_admin` | Everything: every screen and every area, including cases, labs, alerts, users, API clients, rules, data quality, exports and the audit log |
 | `system_admin` | Users, API clients, alert rules, data sources, audit log. No case records |
+| `regional_officer` | Every district of one region: dashboards, forecasts, alerts (acknowledge), pseudonymised case lists and analytics, exports, data-quality review |
 | `national_manager` | Every area: dashboards, forecasts, alerts (acknowledge), alert rules, exports, audit summary, data-quality review |
 | `epidemiologist` | Dashboards, forecasts, alerts, pseudonymised case list and analytics, exports, data-quality review |
 | `district_officer` | Their district: dashboards, full case detail, notify cases, lab results, alerts (acknowledge), exports, data-quality review |
@@ -65,19 +66,18 @@ php artisan serve                           # http://localhost:8000
 
 ### Available users
 
-**Live installation** (https://public-health-surveillance.joseneous.com), created by `surveillance:install-sample --no-users --production-users`:
+**Live installation** (https://public-health-surveillance.joseneous.com), created by `surveillance:install-sample --no-users --production-users`. Every account has the same **temporary** initial password: `Admin@123`.
 
-| Email | Name | Role | Area | Initial password |
-|---|---|---|---|---|
-| `amito@joseneous.com` | Amito | super_admin (the administrator) | All Uganda | `puHoAJfapusn3P` |
-| `janet@joseneous.com` | Janet | super_admin | All Uganda | `hHUVJAq5exb2st` |
-| `susan@joseneous.com` | Susan | super_admin | All Uganda | `5NV3xGWumiJA6N` |
-| `dho.lira@joseneous.com` | Lira District Health Officer | district_officer | Lira district | `BuNYfSfYMCwtdk` |
-| `epi.lira@joseneous.com` | Lira Epidemiologist | epidemiologist | Lira district | `t5UoLmwwEmctfy` |
-| `clinician.lira@joseneous.com` | Lira Hospital Clinician | clinician | Lira Regional Referral Hospital | `e8X47camodJamn` |
-| `lab.lira@joseneous.com` | Lira Hospital Laboratory | lab_officer | Lira Regional Referral Hospital | `TJm3deCAKPyvCz` |
+| Email | Name | Role | Area |
+|---|---|---|---|
+| `amito@gmail.com` | Amito | **super_admin** (the only super user) | All Uganda |
+| `susan@gmail.com` | Susan | district_officer (District Health Officer) | Lira district |
+| `janet@gmail.com` | Janet | regional_officer | Northern region (Lira's region) |
+| `epi.lira@gmail.com` | Lira Epidemiologist | epidemiologist | Lira district |
+| `clinician.lira@gmail.com` | Lira Hospital Clinician | clinician | Lira Regional Referral Hospital |
+| `lab.lira@gmail.com` | Lira Hospital Laboratory | lab_officer | Lira Regional Referral Hospital |
 
-These are **temporary** passwords. Every account must choose its own password at first sign-in (nothing else opens until it does), and re-running the installer never resets a changed password. Change or remove this table once the people have signed in, and set the real email addresses in `database/seeders/ProductionUsersSeeder.php` before the first install. The Lira role accounts have email alerts switched off until real mailboxes exist; alerts still show on screen.
+Every account must choose its own password at first sign-in (12 or more characters, upper and lower case, a number); nothing else opens until it does, and re-running the installer never resets a changed password. **Sign in with each account straight after deploying**, because `Admin@123` is a known password until it has been changed. Replace the emails above with the real ones in `database/seeders/ProductionUsersSeeder.php` before the first install. Only Amito, Susan and Janet receive alert emails; the three role accounts keep alerts on screen only.
 
 **Local development** (created by `surveillance:install-sample`; the password is `SAMPLE_USER_PASSWORD` in `.env`): `admin@`, `manager@`, `epi@`, `officer.kasese@`, `officer.kampala@`, `clinician@`, `lab@outbreak-watch.test`. **Never create these on a production database.**
 
@@ -114,7 +114,7 @@ Settings live in `.env` and `config/surveillance.php`.
 
 | Command | What it does |
 |---|---|
-| `surveillance:install-sample` | Wipe and build a complete working system (refuses in production without `--force`). `--no-users` skips the local sample accounts; `--production-users` creates the live accounts above |
+| `surveillance:install-sample` | Wipe and build a complete working system. It shows which database it will erase and asks yes/no (default no); in production you must also type the database name. `--force` skips the questions (scripts only). `--no-users` skips the local sample accounts; `--production-users` creates the live accounts above |
 | `surveillance:create-user` | Create a user with a role and area |
 | `surveillance:issue-api-token` | Register a facility system and print its token once |
 | `surveillance:simulate-notifications` | Send test notifications through the live pipeline |
@@ -174,7 +174,7 @@ curl -X POST https://your-domain/api/v1/notifications \
 php artisan test
 ```
 
-82 tests cover sign-in, role and area isolation, indicator roll-up, detection and alerting, ingestion and idempotency, security headers, public pages, case analytics, data-quality checks, annotations, saved views, API client management and the alert rule form. Tests use a separate MySQL database (`outbreak_watch_test`, see `phpunit.xml`).
+84 tests cover sign-in, role and area isolation, indicator roll-up, detection and alerting, ingestion and idempotency, security headers, public pages, case analytics, data-quality checks, annotations, saved views, API client management and the alert rule form. Tests use a separate MySQL database (`outbreak_watch_test`, see `phpunit.xml`).
 
 ## Deployment
 

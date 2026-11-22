@@ -40,6 +40,13 @@ class ReportingController extends Controller
         foreach ($rows as $r) {
             $matrix[$r->org_unit_id][$r->period_start] = (float) $r->value;
         }
+        // Facility rows also show timeliness: received on time, received late, or missing.
+        $status = [];
+        if ($children->isNotEmpty() && $children->first()->type === OrgUnit::FACILITY) {
+            foreach (DB::table('reporting_statuses')->whereIn('org_unit_id', $children->pluck('id'))->whereBetween('week_start', [$from->toDateString(), $latest->toDateString()])->get(['org_unit_id', 'week_start', 'received', 'on_time']) as $r) {
+                $status[$r->org_unit_id][$r->week_start] = ! $r->received ? 'missing' : ($r->on_time ? 'on_time' : 'late');
+            }
+        }
         $avg = fn ($id) => isset($matrix[$id]) ? array_sum($matrix[$id]) / count($matrix[$id]) : null;
         $children = $children->map(fn ($c) => (object) ['id' => $c->id, 'name' => $c->name, 'type' => $c->type, 'avg' => $avg($c->id)])->sortBy(fn ($c) => $c->avg ?? 999)->values();
 
@@ -50,7 +57,7 @@ class ReportingController extends Controller
             ->selectRaw('SUM(rs.received) AS received, SUM(rs.on_time) AS on_time, COUNT(*) AS expected')->first();
 
         return view('reporting', [
-            'title' => 'Reporting completeness', 'subtitle' => $area->name, 'area' => $area, 'weeks' => $weeks, 'matrix' => $matrix,
+            'title' => 'Reporting completeness', 'subtitle' => $area->name, 'area' => $area, 'weeks' => $weeks, 'matrix' => $matrix, 'status' => $status,
             'children' => $children, 'trend' => $trend, 'timely' => $timely, 'latest' => $latest, 'areaChoices' => $this->areaOptions($request->user()),
         ]);
     }

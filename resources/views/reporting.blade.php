@@ -33,6 +33,11 @@
                 @foreach ($children as $c)
                     <tr><th scope="row">{{ $c->name }}</th>
                     @foreach ($weeks as $w)
+                        @if (isset($status[$c->id]))
+                            @php $st = $status[$c->id][$w] ?? null; @endphp
+                            <td class="lvl-{{ ['on_time' => 4, 'late' => 2, 'missing' => 1][$st] ?? 0 }}" title="{{ ['on_time' => 'Received on time', 'late' => 'Received late', 'missing' => 'Not received'][$st] ?? 'No data' }}">{{ ['on_time' => 'On time', 'late' => 'Late', 'missing' => 'Missing'][$st] ?? 'n/a' }}</td>
+                            @continue
+                        @endif
                         @php $v = $matrix[$c->id][$w] ?? null; $lvl = $v === null ? 0 : ($v < 50 ? 1 : ($v < 75 ? 2 : ($v < 90 ? 3 : 4))); @endphp
                         <td class="lvl-{{ $lvl }}" title="{{ $v === null ? 'No data' : number_format($v, 0).'%' }}">{{ $v === null ? 'n/a' : number_format($v, 0) }}</td>
                     @endforeach
@@ -40,7 +45,7 @@
                 @endforeach
                 </tbody>
             </table>
-            <div class="ow-legend"><i style="background:#f2c6a9"></i> under 50% <i style="background:#f6e0a7"></i> 50-74% <i style="background:#bfe0cf"></i> 75-89% <i style="background:#6fbf9a"></i> 90% or more <i style="background:#f3f5f7;border:1px solid #cfd8df"></i> no data. Values are percentages; the number is shown in every cell.</div>
+            <div class="ow-legend"><i style="background:#f2c6a9"></i> under 50% <i style="background:#f6e0a7"></i> 50-74% <i style="background:#bfe0cf"></i> 75-89% <i style="background:#6fbf9a"></i> 90% or more <i style="background:#f3f5f7;border:1px solid #cfd8df"></i> no data. Area rows show the percentage of expected reports received; facility rows show whether the report was on time, late or missing. The words or numbers are in every cell, so colour is never the only cue.</div>
             @endif
         </div>
     </div>

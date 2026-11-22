@@ -23,6 +23,11 @@ class RolesAndPermissionsSeeder extends Seeder
             'view aggregates', 'view forecasts', 'view alerts', 'acknowledge alerts', 'manage alert rules',
             'export aggregates', 'annotate charts', 'view audit summary', 'review data quality',
         ],
+        // Oversees every district of one region: charts, alerts, forecasts and pseudonymised cases for that region.
+        'regional_officer' => [
+            'view aggregates', 'view forecasts', 'view alerts', 'acknowledge alerts', 'view cases pseudonymised',
+            'export aggregates', 'annotate charts', 'review data quality',
+        ],
         'epidemiologist' => [
             'view aggregates', 'view forecasts', 'view alerts', 'view cases pseudonymised',
             'export aggregates', 'annotate charts', 'review data quality',
