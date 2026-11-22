@@ -19,8 +19,8 @@
                 {!! $extra !!}
                 <div class="col-xs-6 col-md-2 form-group"><label for="f-from">From</label><input id="f-from" type="text" name="from" class="form-control ow-datepicker" value="{{ $filters['from'] }}" autocomplete="off"></div>
                 <div class="col-xs-6 col-md-2 form-group"><label for="f-to">To</label><input id="f-to" type="text" name="to" class="form-control ow-datepicker" value="{{ $filters['to'] }}" autocomplete="off"></div>
+                <div class="ow-filter-actions"><button type="submit" class="btn btn-primary btn-sm"><i class="fa fa-download" aria-hidden="true"></i> Download CSV</button></div>
             </div>
-            <button type="submit" class="btn btn-primary"><i class="fa fa-download" aria-hidden="true"></i> Download CSV</button>
         </div>
     </form>
 

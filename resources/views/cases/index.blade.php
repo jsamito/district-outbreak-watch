@@ -19,8 +19,8 @@
                     <select id="c-area" name="area" class="form-control ow-select2" data-allow-clear="true" data-placeholder="All my areas"><option value=""></option>@foreach ($areaOptions as $o)<option value="{{ $o->id }}" @selected(($f['area'] ?? '') == $o->id)>{{ $o->name }}</option>@endforeach</select></div>
                 <div class="col-xs-6 col-md-1 form-group"><label for="c-from">From</label><input id="c-from" name="from" type="text" class="form-control ow-datepicker" value="{{ $f['from'] ?? '' }}" autocomplete="off"></div>
                 <div class="col-xs-6 col-md-1 form-group"><label for="c-to">To</label><input id="c-to" name="to" type="text" class="form-control ow-datepicker" value="{{ $f['to'] ?? '' }}" autocomplete="off"></div>
+                <div class="ow-filter-actions"><button class="btn btn-primary btn-sm" type="submit"><i class="fa fa-filter" aria-hidden="true"></i> Apply filters</button><a class="btn btn-default btn-sm" href="{{ route('cases.index') }}">Reset</a></div>
             </div>
-            <div class="ow-filter-actions"><button class="btn btn-primary btn-sm" type="submit"><i class="fa fa-filter" aria-hidden="true"></i> Apply filters</button><a class="btn btn-default btn-sm" href="{{ route('cases.index') }}">Reset</a></div>
         </div>
     </form>
 

@@ -4,6 +4,9 @@
         'datepicker' => [asset_ver('vendor/datepicker/datepicker3.css'), asset_ver('vendor/datepicker/bootstrap-datepicker.js')],
         'toastr' => [asset_ver('vendor/toastr/toastr.min.css'), asset_ver('vendor/toastr/toastr.min.js')],
         'pusher' => ['', asset_ver('vendor/pusher/pusher.min.js')],
+        'jquery' => ['', asset_ver('vendor/jquery/jquery.min.js')],
+        'datatables' => [asset_ver('vendor/datatables/datatables.min.css'), asset_ver('vendor/datatables/datatables.min.js')],
+        'tables' => ['', asset_ver('js/ow-tables.js')],
     ];
     $reverbConfig = config('broadcasting.default') === 'reverb'
         ? ['key' => config('broadcasting.connections.reverb.key'), 'host' => env('REVERB_HOST', request()->getHost()), 'port' => (int) env('REVERB_PORT', 8080), 'scheme' => env('REVERB_SCHEME', 'http')]
@@ -123,10 +126,6 @@
 @stack('alpine')
 @stack('alpine-lib')
 
-<script src="{{ asset_ver('vendor/jquery/jquery.min.js') }}"></script>
-<script src="{{ asset_ver('vendor/bootstrap/js/bootstrap.min.js') }}"></script>
-<script @nonce>window.AdminLTEOptions = { sidebarSlimScroll: false, enableFastclick: false, enableBoxRefresh: false, enableBSToppltip: false, enableControlSidebar: false, navbarMenuSlimscroll: false, directChat: { enable: false }, animationSpeed: 150 };</script>
-<script src="{{ asset_ver('vendor/adminlte/js/app.min.js') }}"></script>
 @stack('plugins')
 <script @nonce>window.owTitle = @js($pageTitle . ' · ' . $appName);</script>
 <script src="{{ asset_ver('js/ow-ui.js') }}"></script>

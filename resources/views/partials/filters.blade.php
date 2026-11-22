@@ -42,10 +42,10 @@
                 <input id="f-to" type="text" name="to" class="form-control ow-datepicker" value="{{ $filters['to'] }}" autocomplete="off" inputmode="numeric" placeholder="yyyy-mm-dd">
             </div>
             @endif
-        </div>
-        <div class="ow-filter-actions">
-            <button type="submit" class="btn btn-primary btn-sm"><i class="fa fa-filter" aria-hidden="true"></i> Apply filters</button>
-            <a href="{{ url()->current() }}" class="btn btn-default btn-sm">Reset</a>
+            <div class="ow-filter-actions">
+                <button type="submit" class="btn btn-primary btn-sm"><i class="fa fa-filter" aria-hidden="true"></i> Apply filters</button>
+                <a href="{{ url()->current() }}" class="btn btn-default btn-sm">Reset</a>
+            </div>
         </div>
     </div>
 </form>

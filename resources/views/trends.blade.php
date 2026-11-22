@@ -19,13 +19,9 @@
     </div>
 @endsection
 
-@push('plugin-styles')
-<link rel="stylesheet" href="{{ asset_ver('vendor/datatables/datatables.min.css') }}">
-@endpush
 @push('plugins')
 <script src="{{ asset_ver('vendor/chartjs/chart.umd.js') }}"></script>
 <script src="{{ asset_ver('js/charts.js') }}"></script>
-<script src="{{ asset_ver('vendor/datatables/datatables.min.js') }}"></script>
 @endpush
 @push('scripts')
 <script @nonce>

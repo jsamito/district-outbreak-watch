@@ -519,3 +519,30 @@ main:focus { outline: none; }
 .main-footer a { color: var(--accent-d); }
 div.dataTables_wrapper div.dataTables_info { color: var(--muted); }
 .fixed .main-sidebar .sidebar { overflow-y: auto; max-height: calc(100vh - 50px); }
+
+/* Layout rules that AdminLTE's script used to apply */
+.content-wrapper { min-height: calc(100vh - 105px); }
+.dropdown.open > .dropdown-menu { display: block; }
+
+/* Filter bars: every field and both buttons sit on one line (they wrap only when the screen is too narrow) */
+.ow-filters .box-body > .row { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 14px; margin: 0; }
+.ow-filters .box-body > .row:before, .ow-filters .box-body > .row:after { display: none; }
+.ow-filters .box-body > .row > [class*="col-"] { float: none; width: auto; flex: 0 1 auto; padding: 0; min-width: 120px; }
+.ow-filters .form-group { margin-bottom: 0; }
+.ow-filters label { margin-bottom: 3px; white-space: nowrap; }
+.ow-filters .select2-container { min-width: 190px; }
+.ow-filters .box-body { padding: 12px 15px; }
+.ow-filters .ow-filter-actions { display: flex; flex-wrap: nowrap; gap: 6px; margin: 0; align-self: flex-end; white-space: nowrap; }
+.ow-filters .ow-filter-actions .btn { height: 34px; display: inline-flex; align-items: center; gap: 5px; }
+.ow-filters .form-control { height: 34px; }
+
+/* Compact filter fields so the whole bar fits one line on laptop widths */
+.ow-filters .box-body > .row > [class*="col-"] { min-width: 0; }
+.ow-filters input.ow-datepicker { width: 112px; }
+.ow-filters select.form-control:not(.ow-select2) { min-width: 110px; }
+.ow-filters .select2-container { min-width: 170px; max-width: 240px; }
+.ow-filters .ow-filter-actions .btn { padding: 0 11px; font-size: 13px; }
+
+/* Secondary text in lists meets AA contrast */
+.ow-list .ow-list-main small, .ow-attn .a-main small, .ow-list-main small { color: var(--muted); }
+.ow-list .ow-list-val { color: var(--ink-2); }

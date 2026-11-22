@@ -55,8 +55,8 @@
     </div>
 @endsection
 
-@push('plugin-styles')<link rel="stylesheet" href="{{ asset_ver('vendor/datatables/datatables.min.css') }}">@endpush
-@push('plugins')<script src="{{ asset_ver('vendor/datatables/datatables.min.js') }}"></script>@endpush
+
+
 @push('scripts')
 <script @nonce>owRegisterDT('alerts-table', { order: [[0, 'asc'], [3, 'desc']], pageLength: 15 });</script>
 @endpush

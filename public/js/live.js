@@ -26,7 +26,12 @@
 
     var meta = document.querySelector('meta[name="reverb"]');
     if (!meta || !window.owLib) { startPolling(); return; }
-    owLib('pusher').then(connect, startPolling);
+    // The socket starts on the first interaction (or after 15 s); until then the page polls, so loading stays light.
+    var started = false;
+    function start() { if (started) { return; } started = true; owLib('pusher').then(connect, startPolling); }
+    startPolling();
+    ['pointerdown', 'keydown', 'touchstart', 'scroll'].forEach(function (ev) { window.addEventListener(ev, start, { once: true, passive: true }); });
+    setTimeout(start, 15000);
 
     function connect() {
         var cfg;

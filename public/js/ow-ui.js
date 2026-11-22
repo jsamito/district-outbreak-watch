@@ -1,33 +1,39 @@
-/* District Outbreak Watch: front-end wiring on top of AdminLTE.
-   Select2, DataTables registry, datepickers, toastr and keyboard/ARIA fixes.
-   Alpine.js drives page state. Plugins are optional: every helper checks that
-   its library is present so pages only load what they use. */
-(function ($) {
+/* District Outbreak Watch: page shell behaviour in plain JavaScript (no jQuery at load).
+   Sidebar, dropdown menu, keyboard and ARIA, filter forms, and a loader that brings in
+   jQuery, select2, datepicker, DataTables and toastr only when something needs them. */
+(function () {
     'use strict';
 
-    /* The sidebar scrolls natively; AdminLTE's fixed layout only checks that this plugin exists. */
-    if (!$.fn.slimscroll) { $.fn.slimscroll = $.fn.slimScroll = function () { return this; }; }
+    /* The DataTables bundle expects a Bootstrap 5 Modal at load time; the app does not use modals. */
+    window.bootstrap = window.bootstrap || {};
+    window.bootstrap.Modal = window.bootstrap.Modal || function () { return { show: function () {}, hide: function () {}, dispose: function () {} }; };
 
-    /* ── Lazy libraries: select2, datepicker and toastr load after the page is usable ── */
+    var doc = document, body = doc.body;
+    var q = function (s, r) { return (r || doc).querySelector(s); };
+    var qa = function (s, r) { return Array.prototype.slice.call((r || doc).querySelectorAll(s)); };
+
+    /* ── Lazy libraries ───────────────────────────────── */
     var assetMap = {};
-    try { assetMap = JSON.parse((document.querySelector('meta[name="assets"]') || {}).content || '{}'); } catch (e) { assetMap = {}; }
+    try { assetMap = JSON.parse((q('meta[name="assets"]') || {}).content || '{}'); } catch (e) { assetMap = {}; }
+    var needsJquery = { select2: 1, datepicker: 1, datatables: 1, tables: 1 };
     var libs = {};
-    function addCss(href) { var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = href; document.head.appendChild(l); }
-    function addJs(src) { return new Promise(function (ok, fail) { var s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = fail; document.head.appendChild(s); }); }
+    function addCss(href) { var l = doc.createElement('link'); l.rel = 'stylesheet'; l.href = href; doc.head.appendChild(l); }
+    function addJs(src) { return new Promise(function (ok, fail) { var s = doc.createElement('script'); s.src = src; s.onload = ok; s.onerror = fail; doc.head.appendChild(s); }); }
     window.owLib = function (name) {
         if (!libs[name]) {
             var a = assetMap[name];
-            if (!a) { libs[name] = Promise.resolve(); } else { if (a[0]) { addCss(a[0]); } libs[name] = addJs(a[1]); }
+            var base = needsJquery[name] ? owLib('jquery') : Promise.resolve();
+            libs[name] = !a ? base : base.then(function () { if (a[0]) { addCss(a[0]); } return addJs(a[1]); });
         }
         return libs[name];
     };
-    window.owAfterLoad = afterLoad;
     function afterLoad(fn) {
         var run = function () { (window.requestIdleCallback || function (f) { setTimeout(f, 300); })(fn, { timeout: 4000 }); };
-        if (document.readyState === 'complete') { run(); } else { window.addEventListener('load', run); }
+        if (doc.readyState === 'complete') { run(); } else { window.addEventListener('load', run); }
     }
+    window.owAfterLoad = afterLoad;
 
-    /* ── Toastr ─────────────────────────────────────────── */
+    /* ── Toasts ───────────────────────────────────────── */
     window.owToast = function (type, message) {
         owLib('toastr').then(function () {
             toastr.options = { closeButton: true, progressBar: true, positionClass: 'toast-top-right', timeOut: 4500, extendedTimeOut: 1500, showMethod: 'fadeIn', hideMethod: 'fadeOut' };
@@ -35,179 +41,124 @@
         });
     };
 
-    /* Bootstrap 5 Modal shim required by the DataTables bs5 bundle */
-    window.bootstrap = window.bootstrap || {};
-    window.bootstrap.Modal = window.bootstrap.Modal || function () { return { show: function () {}, hide: function () {}, dispose: function () {} }; };
+    /* ── Sidebar (replaces AdminLTE's push menu) ──────── */
+    function sidebarOpen() { return window.innerWidth <= 767 ? body.classList.contains('sidebar-open') : !body.classList.contains('sidebar-collapse'); }
+    function syncSidebar() { qa('.sidebar-toggle').forEach(function (t) { t.setAttribute('aria-expanded', sidebarOpen() ? 'true' : 'false'); }); }
+    doc.addEventListener('click', function (e) {
+        var t = e.target.closest ? e.target.closest('[data-toggle="offcanvas"]') : null;
+        if (t) {
+            e.preventDefault();
+            body.classList.toggle(window.innerWidth <= 767 ? 'sidebar-open' : 'sidebar-collapse');
+            syncSidebar();
+            return;
+        }
+        if (window.innerWidth <= 767 && body.classList.contains('sidebar-open') && e.target.closest && e.target.closest('.content-wrapper')) {
+            body.classList.remove('sidebar-open');
+            syncSidebar();
+        }
+    });
+    window.addEventListener('resize', syncSidebar);
 
-    /* ── Select2 ────────────────────────────────────────── */
+    /* ── Dropdown menu (user menu) ────────────────────── */
+    function closeMenus(except) {
+        qa('.dropdown.open').forEach(function (d) {
+            if (d === except) { return; }
+            d.classList.remove('open');
+            var t = q('[data-toggle="dropdown"]', d);
+            if (t) { t.setAttribute('aria-expanded', 'false'); }
+        });
+    }
+    doc.addEventListener('click', function (e) {
+        var t = e.target.closest ? e.target.closest('[data-toggle="dropdown"]') : null;
+        if (t) {
+            e.preventDefault();
+            var d = t.closest('.dropdown');
+            var open = !d.classList.contains('open');
+            closeMenus(open ? d : null);
+            d.classList.toggle('open', open);
+            t.setAttribute('aria-expanded', open ? 'true' : 'false');
+        } else if (!(e.target.closest && e.target.closest('.dropdown-menu'))) {
+            closeMenus(null);
+        }
+    });
+
+    /* ── Keyboard ─────────────────────────────────────── */
+    doc.addEventListener('keydown', function (e) {
+        if (e.key === ' ' && e.target.matches && e.target.matches('a[role="button"]')) { e.preventDefault(); e.target.click(); }
+        if (e.key === 'Escape') {
+            var open = q('.dropdown.open');
+            if (open) { var t = q('[data-toggle="dropdown"]', open); closeMenus(null); if (t) { t.focus(); } }
+        }
+    });
+    doc.addEventListener('click', function (e) {
+        var s = e.target.closest ? e.target.closest('.ow-skip-link') : null;
+        if (s) { var target = q(s.getAttribute('href')); if (target) { target.focus(); } }
+    });
+
+    /* ── Filter forms: selects marked data-autosubmit submit on change ── */
+    doc.addEventListener('change', function (e) {
+        var s = e.target;
+        if (s.matches && s.matches('select[data-autosubmit]') && !s.__owUpgraded) {
+            if (s.getAttribute('data-autosubmit') === 'area' && s.form) { var f = s.form.elements.facility; if (f) { f.value = ''; } }
+            s.form.submit();
+        }
+    });
+
+    /* ── select2 and datepicker: native until first used, then upgraded ── */
     window.owInitSelect2 = function (root) {
-        if (!$.fn.select2) { return; }
-        $(root || document).find('select.ow-select2').each(function () {
+        var $ = window.jQuery;
+        if (!$ || !$.fn.select2) { return; }
+        $(root || doc).find('select.ow-select2').each(function () {
             var $s = $(this);
             if ($s.data('select2')) { return; }
-            $s.select2({
-                width: '100%',
-                dropdownParent: $(document.body),
-                placeholder: $s.data('placeholder') || $s.find('option[value=""]').text() || '— Select —',
-                allowClear: $s.data('allow-clear') === true && !$s.prop('multiple')
-            });
+            $s.select2({ width: '100%', dropdownParent: $(doc.body), placeholder: $s.data('placeholder') || $s.find('option[value=""]').text() || '— Select —', allowClear: $s.data('allow-clear') === true && !$s.prop('multiple') });
+            this.__owUpgraded = true;
+            if (this.hasAttribute('data-autosubmit')) {
+                var el = this;
+                $s.on('change.owsubmit', function () {
+                    if (el.getAttribute('data-autosubmit') === 'area' && el.form && el.form.elements.facility) { el.form.elements.facility.value = ''; }
+                    el.form.submit();
+                });
+            }
         });
     };
-
-    /* Select2 inside Alpine x-for: x-init="$nextTick(() => owInitSelect2Alpine($el))" */
-    window.owInitSelect2Alpine = function (el) {
-        if (!$.fn.select2) { return; }
-        var $el = $(el);
-        if ($el.data('select2')) { $el.select2('destroy'); }
-        $el.select2({ width: '100%', dropdownParent: $(document.body), placeholder: $el.find('option[value=""]').text() || '— Select —' });
-        $el.off('.owalpine').on('select2:select.owalpine select2:unselect.owalpine', function () {
-            el.dispatchEvent(new Event('change', { bubbles: true }));
-        });
-    };
-
-    /* ── Datepickers ────────────────────────────────────── */
     window.owInitDatepickers = function (root) {
-        if (!$.fn.datepicker) { return; }
-        $(root || document).find('input.ow-datepicker:not([data-dp-init])').each(function () {
+        var $ = window.jQuery;
+        if (!$ || !$.fn.datepicker) { return; }
+        $(root || doc).find('input.ow-datepicker:not([data-dp-init])').each(function () {
             var $el = $(this);
             $el.attr('data-dp-init', 1);
-            $el.datepicker({ format: 'yyyy-mm-dd', autoclose: true, todayHighlight: true, weekStart: 1 })
-                .on('changeDate', function () { $el.trigger('input').trigger('change'); });
+            $el.datepicker({ format: 'yyyy-mm-dd', autoclose: true, todayHighlight: true, weekStart: 1 }).on('changeDate', function () { $el.trigger('input').trigger('change'); });
         });
     };
+    function upgrade(el) {
+        if (el.matches('select.ow-select2')) { owLib('select2').then(function () { owInitSelect2(el.parentNode); }); }
+        else if (el.matches('input.ow-datepicker')) { owLib('datepicker').then(function () { owInitDatepickers(el.parentNode); }); }
+    }
+    ['pointerenter', 'focusin', 'touchstart'].forEach(function (ev) {
+        doc.addEventListener(ev, function (e) {
+            var t = e.target;
+            if (t && t.matches && t.matches('select.ow-select2, input.ow-datepicker')) { upgrade(t); }
+        }, { capture: true, passive: true });
+    });
 
-    /* ── DataTables registry ────────────────────────────── */
+    /* ── DataTables: loaded and initialised when a table is about to be seen ── */
     var registry = {};
-    var pdfPromise = null;
-
-    function loadScript(src) {
-        return new Promise(function (resolve, reject) {
-            var s = document.createElement('script');
-            s.src = src; s.onload = resolve; s.onerror = reject;
-            document.head.appendChild(s);
-        });
-    }
-    /* pdfmake is large (about 2 MB): load it only when someone asks for a PDF */
-    function ensurePdf() {
-        if (window.pdfMake && window.pdfMake.vfs) { return Promise.resolve(); }
-        var base = (document.querySelector('meta[name="vendor-base"]') || {}).content || '/vendor/datatables/';
-        pdfPromise = pdfPromise || loadScript(base + 'pdfmake.min.js').then(function () { return loadScript(base + 'vfs_fonts.js'); });
-        return pdfPromise;
-    }
-
-    function cleanCell(data) {
-        var $n = $('<div>').html(data);
-        $n.find('.ow-initial, i.fa, .noExport, script, style, input, button').remove();
-        $n.find('small.text-muted').remove();
-        var t = $n.text().replace(/\s+/g, ' ').trim();
-        return (t === '—' || t === '-') ? '' : t;
-    }
-    window.owCleanCell = cleanCell;
-
-    var cols = { columns: ':not(.noExport)', format: { body: function (d) { return cleanCell(d); } } };
-    var title = function () { return window.owTitle || document.title; };
-
-    /* Export set for AGGREGATED tables only. Tables that list individual cases
-       must register with buttons: [] so no line list can be downloaded. */
-    window.owDefaultButtons = [
-        { extend: 'collection', text: '<i class="fa fa-download"></i> Export', autoClose: true, className: 'dt-button',
-          buttons: [
-            { extend: 'excelHtml5', text: '<i class="fa fa-file-excel-o"></i> Excel', exportOptions: cols, title: title },
-            { extend: 'csvHtml5', text: '<i class="fa fa-file-text-o"></i> CSV', exportOptions: cols,
-              customize: function (csv) { return 'Aggregated data only. ' + title() + ' exported ' + new Date().toISOString().slice(0, 10) + '\n' + csv; } },
-            { extend: 'pdfHtml5', text: '<i class="fa fa-file-pdf-o"></i> PDF', exportOptions: cols, orientation: 'landscape', title: title,
-              action: function (e, dt, node, config) {
-                  var self = this;
-                  ensurePdf().then(function () { $.fn.dataTable.ext.buttons.pdfHtml5.action.call(self, e, dt, node, config); });
-              } },
-            { extend: 'print', text: '<i class="fa fa-print"></i> Print', exportOptions: cols, title: title },
-            { extend: 'copy', text: '<i class="fa fa-copy"></i> Copy', exportOptions: cols }
-          ] },
-        { extend: 'colvis', text: '<i class="fa fa-columns"></i> Columns', className: 'dt-button' }
-    ];
-
-    var defaults = {
-        destroy: true, autoWidth: false, responsive: false, stateSave: false, processing: false,
-        dom: '<"ow-dt-toolbar"<"ow-dt-left"l><"ow-dt-filters"f><"ow-dt-actions"B>>t<"box-footer clearfix"<"pull-left"i><"pull-right"p>>',
-        buttons: window.owDefaultButtons,
-        pageLength: 25,
-        lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'All']],
-        language: {
-            searchPlaceholder: 'Search…', lengthMenu: 'Show _MENU_', info: 'Showing _START_–_END_ of _TOTAL_',
-            infoEmpty: 'No records', zeroRecords: 'No matching records found.', emptyTable: 'No data available.',
-            paginate: { first: '«', last: '»', next: '›', previous: '‹' }
-        }
-    };
-
     window.owRegisterDT = function (id, opts) {
-        var merged = $.extend(true, {}, defaults, opts);
-        if (opts && opts.buttons) { merged.buttons = opts.buttons; }
-        registry[id] = merged;
-        var el = document.getElementById(id);
-        if (el && 'IntersectionObserver' in window) {
-            var io = new IntersectionObserver(function (entries) {
-                if (entries.some(function (e) { return e.isIntersecting; })) { io.disconnect(); setTimeout(function () { window.owInitDT(id); }, 0); }
-            }, { rootMargin: '300px' });
+        registry[id] = opts || {};
+        var el = doc.getElementById(id);
+        if (!el) { return; }
+        var go = function () { owLib('datatables').then(function () { return owLib('tables'); }).then(function () { window.owInitDT(id, registry[id]); }); };
+        if ('IntersectionObserver' in window) {
+            var io = new IntersectionObserver(function (entries) { if (entries.some(function (x) { return x.isIntersecting; })) { io.disconnect(); setTimeout(go, 0); } }, { rootMargin: '300px' });
             io.observe(el);
-        } else {
-            window.owInitDT(id);
-        }
-    };
-    window.owInitDT = function (id) {
-        if (!$.fn.DataTable) { return; }
-        var $t = $('#' + id);
-        if (!$t.length) { return; }
-        if ($.fn.DataTable.isDataTable($t)) { $t.DataTable().destroy(); }
-        $t.DataTable(registry[id] || defaults);
+        } else { go(); }
     };
 
-    /* ── Chart helpers (Okabe-Ito palette, honest defaults) ─ */
     window.owColors = ['#0072b2', '#e69f00', '#009e73', '#d55e00', '#cc79a7', '#56b4e9', '#f0e442', '#6b7682'];
 
-    /* ── Keyboard and ARIA improvements for the AdminLTE shell ─ */
-    $(document).on('keydown', 'a[role="button"]', function (e) {
-        if (e.key === ' ') { e.preventDefault(); this.click(); }
-    });
-    $(document).on('shown.bs.dropdown', function (e) { $(e.target).find('[data-toggle="dropdown"]').attr('aria-expanded', 'true'); });
-    $(document).on('hidden.bs.dropdown', function (e) { $(e.target).find('[data-toggle="dropdown"]').attr('aria-expanded', 'false'); });
-    $(document).on('keydown', function (e) {
-        if (e.key === 'Escape') {
-            var $open = $('.dropdown.open');
-            if ($open.length) { $open.removeClass('open').find('[data-toggle="dropdown"]').attr('aria-expanded', 'false').trigger('focus'); }
-        }
-    });
-    function syncSidebarState() {
-        var $b = $('body');
-        var open = $(window).width() <= 767 ? $b.hasClass('sidebar-open') : !$b.hasClass('sidebar-collapse');
-        $('.sidebar-toggle').attr('aria-expanded', open ? 'true' : 'false');
-    }
-    $(document).on('click', '.sidebar-toggle', function () { setTimeout(syncSidebarState, 80); });
-    $(window).on('resize', syncSidebarState);
-    $(document).on('click', '.ow-skip-link', function () {
-        var t = document.querySelector($(this).attr('href'));
-        if (t) { t.focus(); }
-    });
-
-    /* Filter bars: changing the area clears the facility; selects marked data-autosubmit submit the form. */
-    $(document).on('change', 'select[data-autosubmit]', function () {
-        if (this.getAttribute('data-autosubmit') === 'area') { $(this.form).find('[name=facility]').val(''); }
-        this.form.submit();
-    });
-
-    /* Controls look native until first used; they are upgraded the moment someone points at, focuses or touches them. */
-    function upgrade(el) {
-        var $el = $(el);
-        if ($el.is('select.ow-select2')) {
-            owLib('select2').then(function () { owInitSelect2($el.parent()); });
-        } else if ($el.is('input.ow-datepicker')) {
-            owLib('datepicker').then(function () { owInitDatepickers($el.parent()); });
-        }
-    }
-    $(document).on('pointerenter focusin touchstart', 'select.ow-select2, input.ow-datepicker', function () { upgrade(this); });
-
-    $(function () {
-        syncSidebarState();
-        var flash = document.querySelector('meta[name="flash-status"]');
-        if (flash && flash.content) { afterLoad(function () { window.owToast('success', flash.content); }); }
-    });
-}(window.jQuery));
+    /* ── Start-up ─────────────────────────────────────── */
+    syncSidebar();
+    var flash = q('meta[name="flash-status"]');
+    if (flash && flash.content) { afterLoad(function () { window.owToast('success', flash.content); }); }
+}());
