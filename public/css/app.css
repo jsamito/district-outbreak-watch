@@ -446,3 +446,33 @@ main:focus { outline: none; }
     .no-print, .main-sidebar, .main-header, .main-footer, .box-tools, .btn, .ow-banner, .ow-skip-link { display: none !important; }
     .content-wrapper { margin-left: 0 !important; background: #fff; }
 }
+
+/* Filters, figures, maps, strips */
+.ow-filters { margin-bottom: 15px; }
+.ow-filters .box-body { padding-bottom: 6px; }
+.ow-filters label { font-size: 12.5px; }
+.ow-filter-actions { display: flex; gap: 6px; margin-bottom: 8px; }
+.ow-figure { margin: 0; }
+.ow-chart-container { position: relative; width: 100%; }
+.ow-caption { color: var(--muted); font-size: 12.5px; margin-top: 8px; }
+.ow-datatable { margin-top: 10px; }
+.ow-datatable > summary { cursor: pointer; color: var(--accent); font-weight: 600; font-size: 13px; padding: 4px 0; }
+.ow-datatable table { margin-top: 8px; }
+.ow-period { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 12px; }
+.ow-map { height: 420px; border: 1px solid var(--line); border-radius: 6px; background: #f3f5f7; }
+.ow-map-info, .ow-map-legend { background: rgba(255,255,255,.95); padding: 8px 10px; border: 1px solid var(--line); border-radius: 5px; font-size: 12px; line-height: 1.5; color: var(--ink); }
+.ow-swatch { display: inline-block; width: 14px; height: 12px; margin-right: 6px; vertical-align: -1px; border: 1px solid #aab3bf; }
+.ow-strip .s-delta.bad { color: var(--bad); } .ow-strip .s-delta.good { color: var(--ok); }
+.ow-strip { flex-wrap: wrap; }
+.ow-strip > div { flex: 1 1 140px; }
+.ow-sig { display: inline-block; padding: 1px 7px; border-radius: 4px; font-size: 11.5px; font-weight: 700; }
+.ow-flag { color: var(--warn); font-weight: 600; font-size: 11.5px; }
+.ow-heat td.lvl-0 { background: #f3f5f7; color: transparent; }
+.ow-heat td.lvl-1 { background: #f2c6a9; color: #4a1f00; }
+.ow-heat td.lvl-2 { background: #f6e0a7; color: #4a3500; }
+.ow-heat td.lvl-3 { background: #bfe0cf; color: #0e3b27; }
+.ow-heat td.lvl-4 { background: #6fbf9a; color: #06281a; }
+.ow-heat td { font-size: 11.5px; height: 30px; text-align: center; border-radius: 3px; font-variant-numeric: tabular-nums; }
+.ow-heat th { font-size: 11px; text-align: center; color: var(--muted); font-weight: 600; }
+.ow-heat th:first-child, .ow-heat td:first-child { text-align: left; width: 150px; background: transparent; color: var(--ink-2); font-weight: 600; }
+.ow-notice { background: #fff; border: 1px solid var(--line); border-left: 3px solid #8fb2dc; border-radius: 6px; padding: 10px 14px; margin-bottom: 15px; color: var(--ink-2); }

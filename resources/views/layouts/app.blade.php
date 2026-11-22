@@ -74,10 +74,12 @@
     @include('layouts.sidebar')
 
     <div class="content-wrapper">
+        @if (config('surveillance.synthetic_data'))
         <div class="ow-banner no-print" role="note">
             <i class="fa fa-info-circle" aria-hidden="true"></i>
-            Demonstration system: weekly facility reports, immunization doses and all patient-level records are <strong>synthetic</strong>. Geography and population are open data.
+            <strong>Data notice:</strong> weekly facility reports, immunization doses and case records in this system are generated sample data; no real patient information is held. Geography and population come from open data (see <a href="{{ route('home') }}#data">About the data</a>).
         </div>
+        @endif
         <main id="main" tabindex="-1">
             <section class="content-header">
                 <h1>{{ $pageTitle }} @hasSection('subtitle')<small>@yield('subtitle')</small>@endif</h1>

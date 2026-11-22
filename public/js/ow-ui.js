@@ -159,6 +159,12 @@
         if (t) { t.focus(); }
     });
 
+    /* Filter bars: changing the area clears the facility; selects marked data-autosubmit submit the form. */
+    $(document).on('change', 'select[data-autosubmit]', function () {
+        if (this.getAttribute('data-autosubmit') === 'area') { $(this.form).find('[name=facility]').val(''); }
+        this.form.submit();
+    });
+
     $(function () {
         window.owInitSelect2();
         window.owInitDatepickers();
