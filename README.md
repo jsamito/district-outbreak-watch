@@ -174,7 +174,7 @@ curl -X POST https://your-domain/api/v1/notifications \
 php artisan test
 ```
 
-84 tests cover sign-in, role and area isolation, indicator roll-up, detection and alerting, ingestion and idempotency, security headers, public pages, case analytics, data-quality checks, annotations, saved views, API client management and the alert rule form. Tests use a separate MySQL database (`outbreak_watch_test`, see `phpunit.xml`).
+84 tests cover sign-in, role and area isolation, indicator roll-up, detection and alerting, ingestion and idempotency, security headers, public pages, case analytics, data-quality checks, annotations, saved views, API client management and the alert rule form. Tests use a separate MySQL database on the same server as `.env`; create it once with `CREATE DATABASE outbreak_watch_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;` (see `phpunit.xml`).
 
 ## Deployment
 
