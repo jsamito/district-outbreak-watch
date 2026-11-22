@@ -21,7 +21,7 @@
                         <li class="header">{{ strtoupper($item['heading']) }}</li>
                     @else
                         @php
-                            $active = request()->routeIs($item['route']) || request()->routeIs(\Illuminate\Support\Str::before($item['route'], '.').'.*');
+                            $active = request()->routeIs($item['route'], ...($item['also'] ?? []));
                             $badge = isset($item['badge']) ? ($item['badge'])($u) : null;
                         @endphp
                         <li @class(['active' => $active])>

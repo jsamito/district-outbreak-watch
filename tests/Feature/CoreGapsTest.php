@@ -185,4 +185,18 @@ class CoreGapsTest extends TestCase
         $admin = $this->userFor('system_admin', $this->country);
         $this->actingAs($admin)->get(route('admin.users.create'))->assertOk()->assertSee('What they can see')->assertSee('Sees only the lab worklist', false);
     }
+
+    public function test_sidebar_highlights_exactly_one_item(): void
+    {
+        $officer = $this->userFor('district_officer', $this->districtA);
+        foreach ([route('cases.analytics') => 'Case analytics', route('cases.index') => 'Cases', route('cases.create') => 'Notify a case', route('quality-flags.index') => 'Data quality'] as $url => $label) {
+            $html = $this->actingAs($officer)->get($url)->getContent();
+            preg_match_all('/<li class="active">\s*<a[^>]*>.*?<span>([^<]+)<\/span>/s', $html, $m);
+            $this->assertSame([$label], $m[1], "wrong highlight on $url");
+        }
+        $admin = $this->userFor('system_admin', $this->country);
+        $html = $this->actingAs($admin)->get(route('admin.users'))->getContent();
+        preg_match_all('/<li class="active">\s*<a[^>]*>.*?<span>([^<]+)<\/span>/s', $html, $m);
+        $this->assertSame(['Users'], $m[1]);
+    }
 }
