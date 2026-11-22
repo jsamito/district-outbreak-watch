@@ -503,3 +503,9 @@ main:focus { outline: none; }
 .ow-chip:hover, .ow-chip:focus { background: #f1f4f7; color: var(--ink); text-decoration: none; }
 .ow-chip.active, .ow-chip[aria-current="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
 .ow-chips .ow-spin { color: var(--muted); font-size: 13px; }
+
+/* Select2 inside inline forms (page-header area chooser) keeps a natural width and attaches to the field */
+.form-inline .select2-container { width: auto !important; min-width: 210px; display: inline-block !important; vertical-align: middle; }
+.select2-container--default .select2-selection--single { background: #fff; }
+.select2-dropdown { z-index: 2100; }
+.select2-container--default .select2-search--dropdown .select2-search__field { min-height: 32px; }
