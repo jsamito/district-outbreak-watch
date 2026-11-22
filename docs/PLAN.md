@@ -494,5 +494,5 @@ Use Chart.js 4. Check which version your AdminLTE copy ships; your reference pro
 - **Data quality:** six automatic checks write flags to the `data_quality_flags` table; reviewers mark them reviewed, and the system closes them when the problem goes away.
 - **Annotations and saved views:** a note per week on the trends chart, and named filter sets per screen (dates kept only when asked).
 - **API clients** are registered on an admin screen as well as on the command line.
-- **Wireframes and prototype:** the screens were built directly in the AdminLTE shell, so the working system serves as the prototype. A separate wireframe set and a usability test with five people are still to be done.
+- **Wireframes and prototype:** the screens were built directly in the AdminLTE shell, so the working system serves as the prototype. Wireframes, design rules and the five-person usability test script are in `docs/DESIGN.md`; the test itself has not been run yet.
 - **Email** is configured through `.env`; the DNS records and checks are in `docs/DEPLOYMENT.md` and have not yet been run on a live domain.

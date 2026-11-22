@@ -52,6 +52,8 @@ Real, open data: Uganda boundaries (HDX COD-AB), district population by age and 
 
 API clients can also be registered on the Admin > API clients screen (token shown once). Daily jobs: `surveillance:check-quality` updates the data-quality flags; `surveillance:test-mail you@example.org` checks outgoing email. Deployment, DNS records for email and backups are in `docs/DEPLOYMENT.md`.
 
+Design rules, wireframes and the usability test script are in `docs/DESIGN.md`.
+
 Refresh the raw data files with `php artisan surveillance:prepare-geography DIR` (HDX downloads in `DIR`) and `php artisan surveillance:fetch-reference`.
 
 ## Production checklist
