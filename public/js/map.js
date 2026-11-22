@@ -43,7 +43,8 @@ window.owMap = function (elId, cfg) {
                 });
             }
         }).addTo(map);
-        map.fitBounds(layer.getBounds().pad(0.5));
+        var limited = geo.features.some(function (f) { return !f.properties.accessible; });
+        map.fitBounds(layer.getBounds().pad(limited ? 0.5 : 0.02));
         var legend = L.control({ position: 'bottomleft' });
         legend.onAdd = function () {
             var d = L.DomUtil.create('div', 'ow-map-legend');
