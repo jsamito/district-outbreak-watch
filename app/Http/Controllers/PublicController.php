@@ -50,7 +50,7 @@ class PublicController extends Controller
 
     public function robots(): Response
     {
-        $txt = "User-agent: *\nAllow: /\nAllow: /about-the-data\nAllow: /situation\nDisallow: /login\nDisallow: /dashboard\nDisallow: /trends\nDisallow: /map\nDisallow: /quality\nDisallow: /vaccination\nDisallow: /reporting\nDisallow: /attention\nDisallow: /forecasts\nDisallow: /alerts\nDisallow: /cases\nDisallow: /lab\nDisallow: /exports\nDisallow: /admin\nDisallow: /api\nDisallow: /fhir\nDisallow: /data\nDisallow: /live\nDisallow: /broadcasting\n\nSitemap: ".route('sitemap')."\n";
+        $txt = "User-agent: *\nAllow: /\nAllow: /about-the-data\nAllow: /situation\nDisallow: /login\nDisallow: /dashboard\nDisallow: /trends\nDisallow: /map\nDisallow: /quality\nDisallow: /vaccination\nDisallow: /reporting\nDisallow: /data-quality\nDisallow: /attention\nDisallow: /forecasts\nDisallow: /alerts\nDisallow: /cases\nDisallow: /lab\nDisallow: /exports\nDisallow: /admin\nDisallow: /api\nDisallow: /fhir\nDisallow: /data\nDisallow: /live\nDisallow: /broadcasting\n\nSitemap: ".route('sitemap')."\n";
 
         return response($txt, 200, ['Content-Type' => 'text/plain']);
     }

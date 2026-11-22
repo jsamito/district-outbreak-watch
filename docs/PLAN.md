@@ -484,3 +484,15 @@ Use Chart.js 4. Check which version your AdminLTE copy ships; your reference pro
 - WHO GHO API verified live (WUENIC MCV1, DTP3, BCG); Wikipedia page views are fetched as a weekly snapshot.
 - Facility types come from OSM tags and names, not Uganda's official health-centre levels; the mapping is a documented heuristic.
 - Still unverified: WHO and Wikimedia reuse terms, and the full WHO case-field list.
+
+## 13. As built: differences from this plan
+
+- **Alert subscriptions** became a per-user notification preference (automatic, digest only, or off) plus the rule's audience roles and escalation. There is no separate subscription screen.
+- **Administrative levels** follow Uganda's real structure: country, region, district, facility. The district and chiefdom levels of the original data source were dropped.
+- **Alert methods:** outbreak signal, single case, fixed threshold and cluster (cases close in time in one district). The cluster rule is switched off in the sample data because it overlaps with the outbreak signal.
+- **Case analytics** (epidemic curve, age and sex, case fatality with intervals, time to notification, laboratory follow-up) is a separate aggregate-only screen. It shows no identifiers and is audited.
+- **Data quality:** six automatic checks write flags to the `data_quality_flags` table; reviewers mark them reviewed, and the system closes them when the problem goes away.
+- **Annotations and saved views:** a note per week on the trends chart, and named filter sets per screen (dates kept only when asked).
+- **API clients** are registered on an admin screen as well as on the command line.
+- **Wireframes and prototype:** the screens were built directly in the AdminLTE shell, so the working system serves as the prototype. A separate wireframe set and a usability test with five people are still to be done.
+- **Email** is configured through `.env`; the DNS records and checks are in `docs/DEPLOYMENT.md` and have not yet been run on a live domain.

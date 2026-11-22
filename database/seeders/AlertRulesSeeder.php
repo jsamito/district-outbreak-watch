@@ -22,5 +22,11 @@ class AlertRulesSeeder extends Seeder
             'severity' => 'high', 'min_count' => 1, 'cooldown_hours' => 168, 'escalate_after_minutes' => 120,
             'audience_roles' => ['district_officer', 'national_manager'], 'enabled' => (bool) $immediate,
         ]);
+        // Off by default: it overlaps with the outbreak signal and would double the alerts for the same event. Turn it on per disease where it helps.
+        AlertRule::updateOrCreate(['name' => 'Cluster: five cases in one district within 14 days'], [
+            'disease_id' => null, 'org_unit_id' => null, 'method' => 'cluster', 'params' => ['cluster_days' => 14],
+            'severity' => 'medium', 'min_count' => 5, 'cooldown_hours' => 336, 'escalate_after_minutes' => 720,
+            'audience_roles' => ['district_officer'], 'enabled' => false,
+        ]);
     }
 }

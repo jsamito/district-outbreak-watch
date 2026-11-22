@@ -43,9 +43,11 @@ class AlertEngine
             sigmas: (float) ($params['sigmas'] ?? 3.0), minCount: (int) ($rule->min_count ?: 1)
         );
         $single = $rule->method === 'single_case';
+        $cluster = $rule->method === 'cluster';
+        $threshold = $rule->method === 'threshold';
 
         $diseases = $rule->disease_id ? Disease::where('id', $rule->disease_id)->get()
-            : Disease::where('immediate_notifiable', $single)->get();
+            : ($cluster ? Disease::where('case_based', true)->get() : ($threshold ? Disease::all() : Disease::where('immediate_notifiable', $single)->get()));
         $units = $rule->org_unit_id
             ? OrgUnit::within($rule->orgUnit)->where('type', OrgUnit::DISTRICT)->get(['id', 'name'])
             : OrgUnit::where('type', OrgUnit::DISTRICT)->get(['id', 'name']);
@@ -67,6 +69,8 @@ class AlertEngine
             $series[$r->org_unit_id][$r->dimension_id][$r->period_start] = (float) $r->value;
         }
 
+        $clusters = $cluster ? $this->clusterCounts($week, (int) ($params['cluster_days'] ?? 14), $units->pluck('id')->all()) : [];
+
         $cooldown = now()->subHours((int) $rule->cooldown_hours);
         foreach ($units as $u) {
             foreach ($diseases as $d) {
@@ -78,6 +82,14 @@ class AlertEngine
                 $upper = 0.0;
                 if ($single) {
                     $signal = $observed !== null && $observed >= max(1, $rule->min_count);
+                } elseif ($threshold) {
+                    $limit = (float) ($params['threshold'] ?? 10);
+                    $signal = $observed !== null && $observed >= max($limit, $rule->min_count);
+                    $upper = $limit;
+                } elseif ($cluster) {
+                    $observed = (float) ($clusters[$u->id][$d->id] ?? 0);
+                    $signal = $observed >= max(1, $rule->min_count);
+                    $upper = (float) $rule->min_count;
                 } elseif ($observed !== null) {
                     $res = $detector->evaluate($s)[$key] ?? null;
                     $signal = $res && $res['signal'];
@@ -87,7 +99,7 @@ class AlertEngine
 
                 $active = Alert::where(['alert_rule_id' => $rule->id, 'org_unit_id' => $u->id, 'disease_id' => $d->id])->active()->first();
                 if ($signal) {
-                    $severity = $rule->severity === 'auto' ? OutbreakDetector::severity((float) $observed, $expected, $single) : $rule->severity;
+                    $severity = $rule->severity === 'auto' ? OutbreakDetector::severity((float) $observed, $expected ?: max($upper / 2, 1), $single) : $rule->severity;
                     if ($active) {
                         $raised = self::RANK[$severity] > self::RANK[$active->severity];
                         if ($active->last_signal_week->lt($week)) {
@@ -124,5 +136,24 @@ class AlertEngine
                 }
             }
         }
+    }
+
+    /**
+     * Cases notified in the last $days days up to the end of the week tested, by district of the reporting facility.
+     *
+     * @return array<int,array<int,int>> district id => disease id => cases
+     */
+    private function clusterCounts(CarbonImmutable $week, int $days, array $districtIds): array
+    {
+        $end = $week->endOfWeek()->min(CarbonImmutable::today());
+        $rows = DB::table('cases')->join('org_units AS f', 'f.id', '=', 'cases.reporting_org_unit_id')
+            ->where('cases.classification', '!=', 'discarded')->whereBetween('cases.notification_date', [$end->subDays($days - 1)->toDateString(), $end->toDateString()])
+            ->whereIn('f.parent_id', $districtIds)->groupBy('f.parent_id', 'cases.disease_id')->selectRaw('f.parent_id AS d, cases.disease_id AS dis, COUNT(*) AS n')->get();
+        $out = [];
+        foreach ($rows as $r) {
+            $out[$r->d][$r->dis] = (int) $r->n;
+        }
+
+        return $out;
     }
 }

@@ -11,19 +11,19 @@ class RolesAndPermissionsSeeder extends Seeder
 {
     public const ROLES = [
         'system_admin' => [
-            'manage users', 'manage data sources', 'manage alert rules', 'view audit log',
+            'manage users', 'manage data sources', 'manage alert rules', 'view audit log', 'manage api clients', 'review data quality',
         ],
         'national_manager' => [
             'view aggregates', 'view forecasts', 'view alerts', 'acknowledge alerts', 'manage alert rules',
-            'export aggregates', 'annotate charts', 'view audit summary',
+            'export aggregates', 'annotate charts', 'view audit summary', 'review data quality',
         ],
         'epidemiologist' => [
             'view aggregates', 'view forecasts', 'view alerts', 'view cases pseudonymised',
-            'export aggregates', 'annotate charts',
+            'export aggregates', 'annotate charts', 'review data quality',
         ],
         'district_officer' => [
             'view aggregates', 'view forecasts', 'view alerts', 'acknowledge alerts', 'view cases',
-            'edit cases', 'enter lab results', 'export aggregates', 'annotate charts',
+            'edit cases', 'enter lab results', 'export aggregates', 'annotate charts', 'review data quality',
         ],
         'clinician' => [
             'view aggregates', 'view alerts', 'acknowledge alerts', 'view cases', 'edit cases',

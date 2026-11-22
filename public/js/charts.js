@@ -75,8 +75,12 @@ window.owCharts = (function () {
                 type: s.type, order: s.order };
         });
         var horizontal = !!cfg.horizontal;
-        var value = { beginAtZero: true, title: { display: true, text: cfg.yTitle }, grid: { color: '#eff1f4' }, suggestedMax: cfg.yMax, ticks: { precision: cfg.integer === false ? undefined : 0 } };
-        var cat = { grid: { display: false }, ticks: { autoSkip: false } };
+        var abs = function (v) { return Math.abs(v); };
+        var value = { beginAtZero: true, title: { display: true, text: cfg.yTitle }, grid: { color: '#eff1f4' }, suggestedMax: cfg.yMax, stacked: !!cfg.stacked,
+            ticks: { precision: cfg.integer === false ? undefined : 0, callback: cfg.absTicks ? function (v) { return fmt(abs(v)); } : undefined } };
+        if (cfg.symmetric) { value.min = -cfg.symmetric; value.max = cfg.symmetric; }
+        var cat = { grid: { display: false }, stacked: !!cfg.stacked, ticks: { autoSkip: cfg.autoSkip === true } };
+        if (cfg.categoryTitle) { cat.title = { display: true, text: cfg.categoryTitle }; }
         var chart = new Chart(el, {
             type: 'bar', data: { labels: cfg.labels, datasets: datasets },
             options: {
@@ -85,7 +89,7 @@ window.owCharts = (function () {
                 onHover: cfg.onClick ? function (e, els) { e.native.target.style.cursor = els.length ? 'pointer' : 'default'; } : undefined,
                 plugins: {
                     legend: { display: cfg.series.length > 1 || !!cfg.legend, position: 'bottom' },
-                    tooltip: { callbacks: { label: function (c) { return c.dataset.label + ': ' + fmt(horizontal ? c.parsed.x : c.parsed.y) + (cfg.unit ? ' ' + cfg.unit : ''); }, footer: smallNote(cfg.floor) } },
+                    tooltip: { callbacks: { label: function (c) { var v = horizontal ? c.parsed.x : c.parsed.y; return c.dataset.label + ': ' + fmt(cfg.absTicks ? abs(v) : v) + (cfg.unit ? ' ' + cfg.unit : ''); }, footer: cfg.footer || smallNote(cfg.floor) } },
                     annotation: undefined
                 },
                 scales: horizontal ? { x: value, y: cat } : { y: value, x: cat }

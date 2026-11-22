@@ -50,6 +50,8 @@ Facility systems register with `php artisan surveillance:issue-api-token "Name" 
 
 Real, open data: Uganda boundaries (HDX COD-AB), district population by age and sex (UBOS via UNFPA, HDX COD-PS), facility locations (Healthsites, OpenStreetMap-derived), WHO immunization estimates, Wikipedia page views. No open weekly facility-level disease or district immunization series exists for Uganda, so those are **generated sample data** from real district populations and are labelled as such everywhere. Sources, licences and limits are in `DATA.md` and on the public "About the data" page. To use real surveillance data, load it through the notification API or replace the sample loader; set `SURVEILLANCE_SYNTHETIC_DATA=false` to remove the sample-data notices.
 
+API clients can also be registered on the Admin > API clients screen (token shown once). Daily jobs: `surveillance:check-quality` updates the data-quality flags; `surveillance:test-mail you@example.org` checks outgoing email. Deployment, DNS records for email and backups are in `docs/DEPLOYMENT.md`.
+
 Refresh the raw data files with `php artisan surveillance:prepare-geography DIR` (HDX downloads in `DIR`) and `php artisan surveillance:fetch-reference`.
 
 ## Production checklist

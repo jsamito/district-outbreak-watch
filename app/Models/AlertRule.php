@@ -8,7 +8,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class AlertRule extends Model
 {
-    public const METHODS = ['outbreak_signal' => 'Outbreak signal (above baseline)', 'single_case' => 'Single case (immediately notifiable)'];
+    public const METHODS = ['outbreak_signal' => 'Outbreak signal (above baseline)', 'single_case' => 'Single case (immediately notifiable)',
+        'threshold' => 'Fixed threshold (cases in a week)', 'cluster' => 'Cluster (cases close in time in one district)'];
 
     protected $guarded = [];
 

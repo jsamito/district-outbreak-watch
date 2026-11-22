@@ -25,6 +25,7 @@ class InstallSample extends Command
             ['surveillance:load-sample-data', []],
             ['surveillance:generate-cases', []],
             ['surveillance:run-forecasts', []],
+            ['surveillance:check-quality', []],
             ['surveillance:detect-outbreaks', ['--no-notify' => true]],
         ];
         foreach ($steps as [$cmd, $args]) {

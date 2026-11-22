@@ -25,6 +25,10 @@
                 <div class="col-md-3 form-group"><label for="cooldown_hours">Cooldown (hours)</label><input id="cooldown_hours" type="number" min="1" name="cooldown_hours" class="form-control" value="{{ old('cooldown_hours', $rule->cooldown_hours) }}"><span class="help-block">A resolved alert that signals again within this time is reopened, not repeated.</span></div>
                 <div class="col-md-3 form-group"><label for="escalate_after_minutes">Escalate after (minutes)</label><input id="escalate_after_minutes" type="number" min="15" name="escalate_after_minutes" class="form-control" value="{{ old('escalate_after_minutes', $rule->escalate_after_minutes) }}"><span class="help-block">Leave empty to never escalate.</span></div>
             </div>
+            <div class="row">
+                <div class="col-md-3 form-group @error('threshold') has-error @enderror"><label for="threshold">Threshold (cases in a week)</label><input id="threshold" type="number" min="1" name="threshold" class="form-control" value="{{ old('threshold', $rule->params['threshold'] ?? 10) }}"><span class="help-block">Used by the fixed threshold method.</span>@error('threshold')<span class="help-block">{{ $message }}</span>@enderror</div>
+                <div class="col-md-3 form-group @error('cluster_days') has-error @enderror"><label for="cluster_days">Cluster window (days)</label><input id="cluster_days" type="number" min="3" max="60" name="cluster_days" class="form-control" value="{{ old('cluster_days', $rule->params['cluster_days'] ?? 14) }}"><span class="help-block">Used by the cluster method: the minimum cases above must fall within this many days in one district.</span>@error('cluster_days')<span class="help-block">{{ $message }}</span>@enderror</div>
+            </div>
             <fieldset class="form-group @error('audience_roles') has-error @enderror"><legend style="font-size:13px;font-weight:600;border:0;margin-bottom:6px">Who is notified first</legend>
                 @foreach ($roles as $role)
                     @continue(in_array($role, ['system_admin', 'lab_officer', 'epidemiologist']))

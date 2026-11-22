@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Concerns\ResolvesFilters;
+use App\Models\Annotation;
 use App\Services\AggregateQuery;
 use App\Services\OutbreakDetector;
 use Carbon\CarbonImmutable;
@@ -43,6 +44,7 @@ class TrendController extends Controller
             'title' => 'Trends', 'subtitle' => $disease->name.' · '.$area->name,
             'labels' => $weeks, 'cases' => array_map(fn ($w) => $series[$w], $weeks), 'ma' => $ma, 'prevYear' => $prevYear,
             'signals' => array_map(fn ($w) => (bool) ($eval[$w]['signal'] ?? false), $weeks), 'rows' => $rows,
+            'annotations' => Annotation::for($area, $disease)->with('user:id,name')->whereBetween('period_start', [$from->toDateString(), $to->toDateString()])->orderBy('period_start')->get(),
             'total' => array_sum(array_map(fn ($w) => $series[$w], $weeks)),
         ]);
     }

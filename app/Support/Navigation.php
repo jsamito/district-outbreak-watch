@@ -23,6 +23,8 @@ class Navigation
             ['label' => 'Quality control chart', 'route' => 'quality', 'icon' => 'fa-bar-chart', 'any' => ['view aggregates']],
             ['label' => 'Vaccination', 'route' => 'vaccination', 'icon' => 'fa-medkit', 'any' => ['view aggregates']],
             ['label' => 'Reporting', 'route' => 'reporting', 'icon' => 'fa-check-square-o', 'any' => ['view aggregates']],
+            ['label' => 'Case analytics', 'route' => 'cases.analytics', 'icon' => 'fa-pie-chart', 'any' => ['view cases', 'view cases pseudonymised']],
+            ['label' => 'Data quality', 'route' => 'quality-flags.index', 'icon' => 'fa-flag-o', 'any' => ['view aggregates']],
             ['label' => 'Forecasts', 'route' => 'forecasts', 'icon' => 'fa-area-chart', 'any' => ['view forecasts']],
             ['label' => 'Public attention', 'route' => 'attention', 'icon' => 'fa-globe', 'any' => ['view aggregates']],
             ['heading' => 'Action'],
@@ -35,6 +37,7 @@ class Navigation
             ['heading' => 'Administration'],
             ['label' => 'Alert rules', 'route' => 'alert-rules.index', 'icon' => 'fa-sliders', 'any' => ['manage alert rules']],
             ['label' => 'Users', 'route' => 'admin.users', 'icon' => 'fa-users', 'any' => ['manage users']],
+            ['label' => 'API clients', 'route' => 'admin.api-clients', 'icon' => 'fa-plug', 'any' => ['manage api clients']],
             ['label' => 'Data sources', 'route' => 'admin.sources', 'icon' => 'fa-database', 'any' => ['manage data sources']],
             ['label' => 'Audit log', 'route' => 'admin.audit', 'icon' => 'fa-history', 'any' => ['view audit log', 'view audit summary']],
         ];

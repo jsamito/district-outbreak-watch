@@ -546,3 +546,13 @@ div.dataTables_wrapper div.dataTables_info { color: var(--muted); }
 /* Secondary text in lists meets AA contrast */
 .ow-list .ow-list-main small, .ow-attn .a-main small, .ow-list-main small { color: var(--muted); }
 .ow-list .ow-list-val { color: var(--ink-2); }
+
+/* Saved views popover */
+.ow-views { position: relative; display: inline-block; }
+.ow-views > summary { list-style: none; cursor: pointer; }
+.ow-views > summary::-webkit-details-marker { display: none; }
+.ow-views__panel { position: absolute; right: 0; top: 100%; z-index: 30; width: 260px; margin-top: 4px; padding: 10px 12px; background: #fff; border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 6px 18px rgba(0,0,0,.12); }
+.ow-views__row { display: flex; justify-content: space-between; align-items: center; }
+.ow-views__panel hr { margin: 8px 0; }
+.ow-views__panel label { font-size: 12px; font-weight: 600; display: block; margin-bottom: 4px; }
+.ow-views__panel .checkbox-inline { font-weight: 400; margin: 6px 0; display: inline-block; }
