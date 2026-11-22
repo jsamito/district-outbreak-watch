@@ -121,5 +121,34 @@ window.owCharts = (function () {
         });
     }
 
-    return { line: line, bar: bar, uchart: uchart, fmt: fmt };
+    /* Projection chart: history, projected values and 80% / 95% intervals. */
+    function forecast(id, cfg) {
+        if (!init()) { return null; }
+        var el = document.getElementById(id);
+        if (!el) { return null; }
+        label(el, cfg.ariaLabel);
+        var labels = cfg.historyLabels.concat(cfg.futureLabels);
+        var pad = function (arr) { return new Array(cfg.historyLabels.length).fill(null).concat(arr); };
+        var hist = cfg.history.concat(new Array(cfg.futureLabels.length).fill(null));
+        var join = function (arr) { var a = pad(arr); a[cfg.historyLabels.length - 1] = cfg.history[cfg.history.length - 1]; return a; };
+        return new Chart(el, {
+            type: 'line',
+            data: { labels: labels, datasets: [
+                { label: '95% interval (upper)', data: join(cfg.upper95), borderColor: 'transparent', backgroundColor: 'rgba(0,114,178,0.10)', pointRadius: 0, fill: '+1', order: 5 },
+                { label: '95% interval', data: join(cfg.lower95), borderColor: 'transparent', backgroundColor: 'rgba(0,114,178,0.10)', pointRadius: 0, fill: false, order: 5 },
+                { label: '80% interval (upper)', data: join(cfg.upper80), borderColor: 'transparent', backgroundColor: 'rgba(0,114,178,0.22)', pointRadius: 0, fill: '+1', order: 4 },
+                { label: '80% interval', data: join(cfg.lower80), borderColor: 'transparent', backgroundColor: 'rgba(0,114,178,0.22)', pointRadius: 0, fill: false, order: 4 },
+                { label: 'Reported cases', data: hist, borderColor: owColors[0], backgroundColor: owColors[0], borderWidth: 2, pointStyle: 'circle', pointRadius: 3, tension: 0.1, order: 1 },
+                { label: 'Projection', data: join(cfg.point), borderColor: owColors[3], backgroundColor: owColors[3], borderWidth: 2, borderDash: [6, 3], pointStyle: 'triangle', pointRadius: 5, tension: 0, order: 0 }
+            ] },
+            options: {
+                responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+                plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, filter: function (item) { return item.text.indexOf('(upper)') === -1 && item.text !== '95% interval' && item.text !== '80% interval' || item.text === '95% interval' && false; } } },
+                    tooltip: { filter: function (item) { return item.dataset.label.indexOf('(upper)') === -1; } } },
+                scales: { y: { beginAtZero: true, title: { display: true, text: 'Cases per week' }, ticks: { precision: 0 } }, x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 12 } } }
+            }
+        });
+    }
+
+    return { line: line, bar: bar, uchart: uchart, forecast: forecast, fmt: fmt };
 }());

@@ -64,7 +64,8 @@ trait ResolvesFilters
     {
         $latest = app(AggregateQuery::class)->latestWeek() ?? CarbonImmutable::today()->startOfWeek();
         $to = $request->filled('to') ? $this->parseWeek($request->input('to'), $latest) : $latest;
-        $to = $to->greaterThan($latest) ? $latest : $to;
+        $current = app(AggregateQuery::class)->currentWeek();
+        $to = $to->greaterThan($current) ? $current : $to;
         $from = $request->filled('from') ? $this->parseWeek($request->input('from'), $to->subWeeks($defaultWeeks - 1)) : $to->subWeeks($defaultWeeks - 1);
         if ($from->greaterThan($to)) {
             $from = $to->subWeeks($defaultWeeks - 1);

@@ -12,9 +12,17 @@ use Illuminate\Support\Facades\DB;
 /** Read access to stored aggregates. Callers must already have authorised the org units they pass in. */
 class AggregateQuery
 {
+    /** Start of the week in progress; live notifications land here. */
+    public function currentWeek(): CarbonImmutable
+    {
+        return CarbonImmutable::today()->startOfWeek();
+    }
+
+    /** Latest complete week with data: the week dashboards, signals and alerts are based on. */
     public function latestWeek(): ?CarbonImmutable
     {
-        $d = DB::table('indicator_values')->where('indicator_id', Indicator::idFor(Indicator::CASES))->where('period_type', 'week')->max('period_start');
+        $d = DB::table('indicator_values')->where('indicator_id', Indicator::idFor(Indicator::CASES))->where('period_type', 'week')
+            ->where('period_start', '<', $this->currentWeek()->toDateString())->max('period_start');
 
         return $d ? CarbonImmutable::parse($d) : null;
     }

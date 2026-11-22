@@ -1,7 +1,13 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\AlertController;
+use App\Http\Controllers\AlertRuleController;
 use App\Http\Controllers\AttentionController;
+use App\Http\Controllers\CaseController;
+use App\Http\Controllers\ForecastController;
+use App\Http\Controllers\LabController;
+use App\Http\Controllers\LiveController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DataController;
 use App\Http\Controllers\ExportController;
@@ -37,7 +43,41 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/vaccination', [VaccinationController::class, 'index'])->name('vaccination');
         Route::get('/reporting', [ReportingController::class, 'index'])->name('reporting');
         Route::get('/attention', [AttentionController::class, 'index'])->name('attention');
+        Route::get('/live/summary', [LiveController::class, 'summary'])->name('live.summary');
         Route::get('/data/districts.geojson', [DataController::class, 'districts'])->name('data.districts');
+    });
+
+    Route::middleware('can:view forecasts')->get('/forecasts', [ForecastController::class, 'index'])->name('forecasts');
+
+    Route::middleware('can:view alerts')->group(function (): void {
+        Route::get('/alerts', [AlertController::class, 'index'])->name('alerts.index');
+        Route::post('/alerts/preferences', [AlertController::class, 'preferences'])->name('alerts.preferences');
+        Route::get('/alerts/{alert}', [AlertController::class, 'show'])->whereNumber('alert')->name('alerts.show');
+        Route::post('/alerts/{alert}/acknowledge', [AlertController::class, 'acknowledge'])->whereNumber('alert')->name('alerts.acknowledge');
+    });
+
+    Route::middleware('can:manage alert rules')->group(function (): void {
+        Route::get('/alert-rules', [AlertRuleController::class, 'index'])->name('alert-rules.index');
+        Route::get('/alert-rules/create', [AlertRuleController::class, 'create'])->name('alert-rules.create');
+        Route::post('/alert-rules', [AlertRuleController::class, 'store'])->name('alert-rules.store');
+        Route::get('/alert-rules/{alertRule}/edit', [AlertRuleController::class, 'edit'])->name('alert-rules.edit');
+        Route::put('/alert-rules/{alertRule}', [AlertRuleController::class, 'update'])->name('alert-rules.update');
+    });
+
+    Route::middleware('can:edit cases')->group(function (): void {
+        Route::get('/cases/create', [CaseController::class, 'create'])->name('cases.create');
+        Route::post('/cases', [CaseController::class, 'store'])->name('cases.store');
+        Route::put('/cases/{case}', [CaseController::class, 'update'])->whereNumber('case')->name('cases.update');
+        Route::post('/cases/{case}/notes', [CaseController::class, 'note'])->whereNumber('case')->name('cases.note');
+    });
+    Route::middleware('can:enter lab results')->group(function (): void {
+        Route::post('/cases/{case}/lab', [CaseController::class, 'requestLab'])->whereNumber('case')->name('cases.lab');
+        Route::post('/lab/{lab}/result', [LabController::class, 'result'])->whereNumber('lab')->name('lab.result');
+    });
+    Route::middleware('can:view lab worklist')->get('/lab', [LabController::class, 'index'])->name('lab.index');
+    Route::middleware('permission:view cases|view cases pseudonymised')->group(function (): void {
+        Route::get('/cases', [CaseController::class, 'index'])->name('cases.index');
+        Route::get('/cases/{case}', [CaseController::class, 'show'])->whereNumber('case')->name('cases.show');
     });
 
     Route::middleware('can:export aggregates')->group(function (): void {

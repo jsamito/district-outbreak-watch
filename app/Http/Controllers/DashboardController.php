@@ -41,7 +41,9 @@ class DashboardController extends Controller
             $cur = $s[$latest->toDateString()] ?? 0.0;
             $pre = $s[$prev->toDateString()] ?? 0.0;
 
-            return (object) ['disease' => $d, 'cases' => $cur, 'prev' => $pre, 'delta' => $pre > 0 ? round(($cur - $pre) / $pre * 100) : null];
+            $live = $this->q->series($area, $d->id, $this->q->currentWeek(), $this->q->currentWeek())[$this->q->currentWeek()->toDateString()] ?? 0.0;
+
+            return (object) ['disease' => $d, 'cases' => $cur, 'prev' => $pre, 'live' => $live, 'delta' => $pre > 0 ? round(($cur - $pre) / $pre * 100) : null];
         });
         $reporting = $this->q->reportingSeries($area, $latest, $latest)[$latest->toDateString()] ?? null;
 

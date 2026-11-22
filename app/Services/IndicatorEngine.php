@@ -110,4 +110,43 @@ class IndicatorEngine
 
         return $total;
     }
+
+    /**
+     * Adds $delta cases for one disease and week to a facility and every area above it (district, region, country).
+     * Used by live notifications so dashboards update without a full rebuild.
+     */
+    public function incrementCases(\App\Models\OrgUnit $facility, int $diseaseId, string $week, int $delta): void
+    {
+        $id = Indicator::idFor(Indicator::CASES);
+        foreach ($this->chain($facility) as $unitId) {
+            DB::statement("
+                INSERT INTO indicator_values (org_unit_id, indicator_id, dimension_id, period_type, period_start, numerator, denominator, value, computed_at)
+                VALUES (?, ?, ?, 'week', ?, ?, NULL, ?, NOW())
+                ON DUPLICATE KEY UPDATE numerator = GREATEST(numerator + VALUES(numerator), 0), value = GREATEST(value + VALUES(value), 0), computed_at = NOW()
+            ", [$unitId, $id, $diseaseId, $week, $delta, $delta]);
+        }
+    }
+
+    /** Marks a facility's report for a week as received (adds one received report along the chain when it was missing). */
+    public function markReported(\App\Models\OrgUnit $facility, string $week): void
+    {
+        $id = Indicator::idFor(Indicator::REPORTING);
+        foreach ($this->chain($facility) as $unitId) {
+            DB::statement("
+                UPDATE indicator_values SET numerator = numerator + 1, value = 100 * (numerator + 1) / NULLIF(denominator, 0), computed_at = NOW()
+                WHERE org_unit_id = ? AND indicator_id = ? AND dimension_id = 0 AND period_type = 'week' AND period_start = ? AND numerator < denominator
+            ", [$unitId, $id, $week]);
+        }
+    }
+
+    /** @return array<int,int> facility id followed by its ancestors */
+    private function chain(\App\Models\OrgUnit $facility): array
+    {
+        $ids = [];
+        for ($u = $facility; $u; $u = $u->parent) {
+            $ids[] = $u->id;
+        }
+
+        return $ids;
+    }
 }

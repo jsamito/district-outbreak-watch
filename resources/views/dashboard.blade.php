@@ -16,16 +16,16 @@
 @endsection
 
 @section('content')
-    <section aria-label="Headline numbers" class="ow-strip">
+    <section aria-label="Headline numbers" class="ow-strip" data-live-area="{{ $area->id }}" data-live-url="{{ route('live.summary') }}">
         @foreach ($strip as $s)
-            <div>
+            <div data-live-disease="{{ $s->disease->code }}">
                 <div class="s-label"><i class="fa fa-stethoscope" aria-hidden="true"></i> {{ $s->disease->name }}</div>
                 <div class="s-num">{{ number_format($s->cases) }}
                     @if ($s->delta !== null)
                         <span class="s-delta {{ $s->delta > 0 ? 'bad' : 'good' }}"><span aria-hidden="true">{{ $s->delta > 0 ? '▲' : '▼' }}</span> {{ abs($s->delta) }}%<span class="sr-only"> {{ $s->delta > 0 ? 'increase' : 'decrease' }} on the previous week</span></span>
                     @endif
                 </div>
-                <div class="s-hint">cases this week @if ($s->cases > 0 && $s->cases < config('surveillance.small_number_floor'))· <span class="ow-flag">small number</span>@endif</div>
+                <div class="s-hint">cases last full week @if ($s->cases > 0 && $s->cases < config('surveillance.small_number_floor'))· <span class="ow-flag">small number</span>@endif<br><span class="ow-live" aria-live="polite"><span data-live-count>{{ number_format($s->live) }}</span> so far this week</span></div>
             </div>
         @endforeach
         <div>
@@ -105,7 +105,9 @@
 @endsection
 
 @push('plugins')
+<script src="{{ asset('vendor/pusher/pusher.min.js') }}"></script>
 <script src="{{ asset('vendor/chartjs/chart.umd.js') }}"></script>
+<script src="{{ asset('js/live.js') }}"></script>
 <script src="{{ asset('js/charts.js') }}"></script>
 @endpush
 

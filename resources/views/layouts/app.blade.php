@@ -12,6 +12,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="robots" content="noindex, nofollow">
+    @if (config('broadcasting.default') === 'reverb')<meta name="reverb" content='@json(['key' => config('broadcasting.connections.reverb.key'), 'host' => env('REVERB_HOST', request()->getHost()), 'port' => (int) env('REVERB_PORT', 8080), 'scheme' => env('REVERB_SCHEME', 'http')])'>@endif
     <meta name="vendor-base" content="{{ asset('vendor/datatables') }}/">
     @if (session('status'))<meta name="flash-status" content="{{ session('status') }}">@endif
     <title>{{ $pageTitle }} · {{ $appName }}</title>
@@ -44,6 +45,10 @@
             </a>
             <div class="navbar-custom-menu">
                 <ul class="nav navbar-nav">
+                    @if (Route::has('alerts.index') && $user->can('view alerts'))
+                        @php $openAlerts = \App\Models\Alert::visibleTo($user)->where('status', 'open')->count(); @endphp
+                        <li><a href="{{ route('alerts.index') }}" title="Open alerts"><i class="fa fa-bell-o" aria-hidden="true"></i>@if ($openAlerts)<span class="label label-danger" style="margin-left:3px">{{ $openAlerts }}</span>@endif<span class="sr-only">{{ $openAlerts }} open alerts</span></a></li>
+                    @endif
                     @stack('navbar-items')
                     <li class="dropdown user user-menu">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
