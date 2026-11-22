@@ -168,7 +168,7 @@ curl -X POST https://your-domain/api/v1/notifications \
 
 - Built toward WCAG 2.2 AA: skip link, visible focus, text alternative and data table for every chart, colour-blind-safe palette with a second cue (shape or dash), reduced reliance on colour, 34 px or larger controls.
 - Charts start at zero, show denominators and mark small numbers.
-- Lighthouse (mobile, throttled): performance 85 to 100 and accessibility 96 to 100 on every page measured. Table in [docs/PDF_CHECKLIST.md](docs/PDF_CHECKLIST.md). Scripts load on demand and assets are versioned for long caching.
+- Lighthouse (mobile, throttled): performance 85 to 100 and accessibility 96 to 100 on every page measured. Scripts load on demand and assets are versioned for long caching.
 - Used in Chromium browsers; Firefox checked on the sign-in and public pages. Layouts checked at 1280, 768 and 375 px.
 
 ## Tests
@@ -209,7 +209,6 @@ docs                   plan, requirements, research, design, deployment, checkli
 | [docs/RESEARCH.md](docs/RESEARCH.md) | Sources and decisions |
 | [docs/DESIGN.md](docs/DESIGN.md) | Design rules, wireframes, usability test script |
 | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Production checklist, email DNS, backups |
-| [docs/PDF_CHECKLIST.md](docs/PDF_CHECKLIST.md) | Capstone requirement, evidence and status |
 | [DATA.md](DATA.md) | Data provenance, licences and limits |
 
 ## Known limits
