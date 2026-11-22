@@ -404,6 +404,7 @@ main:focus { outline: none; }
 /* ═══════════ Login (split panel, from the reference design) ═══════════ */
 .ow-login { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     background: #f0f2f5; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; color: var(--ink); }
+.ow-login *, .ow-login *::before, .ow-login *::after { box-sizing: border-box; }
 .ow-login__shell { display: flex; width: 100%; max-width: 760px; min-height: 420px; border-radius: 12px; overflow: hidden; box-shadow: 0 12px 40px rgba(0,0,0,.15); background: #fff; }
 .ow-login__left { flex: 0 0 40%; background: #1b2430; color: #fff; padding: 48px 28px 36px; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; }
 .ow-login__left::before { content: ''; position: absolute; top: -30px; right: -30px; width: 140px; height: 140px; border-radius: 50%; background: rgba(255,255,255,.07); }
@@ -420,14 +421,14 @@ main:focus { outline: none; }
 .ow-login__err { background: #fbe6e3; color: #8f2a20; border-radius: 7px; padding: 8px 12px; font-size: 12.5px; margin-bottom: 12px; }
 .ow-login label { display: block; font-size: 11px; font-weight: 700; color: #3f4a59; text-transform: uppercase; letter-spacing: .05em; margin: 12px 0 4px; }
 .ow-login label:first-of-type { margin-top: 0; }
-.ow-login input[type=email], .ow-login input[type=text], .ow-login input[type=password] { width: 100%; border: 1px solid #aab3bf; border-radius: 7px; padding: 9px 11px; font-size: 14px; color: #16202e; background: #fff; min-height: 40px; }
+.ow-login input[type=email], .ow-login input[type=text], .ow-login input[type=password] { width: 100%; border: 1px solid #aab3bf; border-radius: 7px; padding: 0 11px; font-size: 14px; color: #16202e; background: #fff; height: 38px; }
 .ow-login input:focus { outline: 2px solid transparent; border-color: #2f6fba; box-shadow: 0 0 0 3px rgba(47,111,186,.35); }
 .ow-login__pw { position: relative; }
-.ow-login__pw input { padding-right: 48px; }
-.ow-login__toggle { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); background: none; border: 0; color: #4b5768; cursor: pointer; padding: 8px 10px; font-size: 15px; line-height: 1; min-width: 36px; min-height: 36px; }
+.ow-login__pw input { padding-right: 44px; }
+.ow-login__toggle { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); background: none; border: 0; color: #4b5768; cursor: pointer; padding: 0; font-size: 15px; line-height: 1; width: 36px; height: 36px; }
 .ow-login__remember { display: flex !important; align-items: center; gap: 7px; font-size: 12.5px !important; color: #3f4a59 !important; margin: 12px 0 16px !important; cursor: pointer; text-transform: none !important; letter-spacing: 0 !important; font-weight: 500 !important; }
 .ow-login__remember input { width: 15px; height: 15px; cursor: pointer; accent-color: #2f6fba; }
-.ow-login__submit { width: 100%; background: #2f6fba; color: #fff; border: 0; border-radius: 7px; padding: 10px; font-size: 14px; font-weight: 700; cursor: pointer; min-height: 42px; }
+.ow-login__submit { width: 100%; background: #2f6fba; color: #fff; border: 0; border-radius: 7px; padding: 0 10px; font-size: 14px; font-weight: 700; cursor: pointer; height: 40px; }
 .ow-login__submit:hover { background: #265a96; }
 .ow-login__note { margin: 14px 0 0; color: var(--muted); font-size: 12px; text-align: center; }
 @media (max-width: 600px) {
