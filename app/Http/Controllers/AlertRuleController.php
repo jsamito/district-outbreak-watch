@@ -61,7 +61,7 @@ class AlertRuleController extends Controller
             'method' => ['required', 'in:'.implode(',', array_keys(AlertRule::METHODS))], 'severity' => ['required', 'in:auto,high,medium,low'],
             'min_count' => ['required', 'integer', 'min:1', 'max:1000'], 'cooldown_hours' => ['required', 'integer', 'min:1', 'max:2160'],
             'escalate_after_minutes' => ['nullable', 'integer', 'min:15', 'max:10080'], 'baseline_weeks' => ['required', 'integer', 'min:4', 'max:26'],
-            'sigmas' => ['required', 'numeric', 'min:1', 'max:6'], 'audience_roles' => ['required', 'array', 'min:1'], 'audience_roles.*' => ['in:'.implode(',', array_keys(RolesAndPermissionsSeeder::ROLES))],
+            'sigmas' => ['required', 'numeric', 'min:1', 'max:6'], 'audience_roles' => ['required', 'array', 'min:1'], 'audience_roles.*' => ['in:national_manager,district_officer,clinician'],
         ]);
 
         return [

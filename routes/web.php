@@ -50,6 +50,7 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/areas/{orgUnit}', [OrgUnitController::class, 'show'])->name('areas.show');
 
     Route::middleware('can:view aggregates')->group(function (): void {
+        Route::get('/dashboard/data', [DashboardController::class, 'data'])->name('dashboard.data');
         Route::get('/trends', [TrendController::class, 'index'])->name('trends');
         Route::get('/map', [MapController::class, 'index'])->name('map');
         Route::get('/quality', [QualityController::class, 'index'])->name('quality');

@@ -9,6 +9,7 @@ use App\Models\OrgUnit;
 use App\Services\AggregateQuery;
 use App\Services\OutbreakDetector;
 use App\Services\SignalService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -17,6 +18,43 @@ class DashboardController extends Controller
     use ResolvesFilters;
 
     public function __construct(private AggregateQuery $q, private OutbreakDetector $detector, private SignalService $signals) {}
+
+    /** Disease-dependent chart data: weekly trend with signals and the areas ranked below the selected one. */
+    private function panel(OrgUnit $area, Disease $disease, \Carbon\CarbonImmutable $latest): array
+    {
+        $from = $latest->subWeeks(51);
+        $series = $this->q->series($area, $disease->id, $from->subWeeks(11), $latest);
+        $eval = $this->detector->evaluate($series);
+        $weeks = array_values(array_filter(array_keys($series), fn ($w) => $w >= $from->toDateString()));
+        $trend = [
+            'labels' => $weeks,
+            'cases' => array_map(fn ($w) => $series[$w], $weeks),
+            'signals' => array_map(fn ($w) => (bool) ($eval[$w]['signal'] ?? false), $weeks),
+            'upper' => array_map(fn ($w) => $eval[$w]['upper'] ?? null, $weeks),
+        ];
+        $children = $this->q->childTotals($area, $disease->id, $latest->subWeeks(3), $latest);
+        $rank = $children->every(fn ($c) => $c->incidence !== null) && $children->isNotEmpty() ? 'incidence' : 'cases';
+
+        return ['trend' => $trend, 'top' => $children->sortByDesc($rank)->take(10)->values(), 'rank' => $rank];
+    }
+
+    /** JSON for the overview charts when the disease is switched without reloading the page. */
+    public function data(Request $request): JsonResponse
+    {
+        abort_unless($request->user()->can('view aggregates'), 403);
+        $area = $this->area($request);
+        $latest = $this->q->latestWeek();
+        abort_unless($latest, 404);
+        $disease = $this->disease($request, 'measles');
+        $p = $this->panel($area, $disease, $latest);
+
+        return response()->json([
+            'disease' => ['code' => $disease->code, 'name' => $disease->name],
+            'trend' => $p['trend'], 'rank' => $p['rank'],
+            'top' => $p['top']->map(fn ($t) => ['name' => $t->name, 'cases' => (float) $t->cases, 'population' => $t->population, 'incidence' => $t->incidence === null ? null : round($t->incidence, 1)])->values(),
+            'trendsUrl' => route('trends', ['disease' => $disease->code, 'area' => $area->id]),
+        ])->header('Cache-Control', 'no-store');
+    }
 
     public function index(Request $request): View
     {
@@ -47,22 +85,10 @@ class DashboardController extends Controller
         });
         $reporting = $this->q->reportingSeries($area, $latest, $latest)[$latest->toDateString()] ?? null;
 
-        // Trend with signal markers for the selected disease
-        $from = $latest->subWeeks(51);
-        $series = $this->q->series($area, $disease->id, $from->subWeeks(11), $latest);
-        $eval = $this->detector->evaluate($series);
-        $weeks = array_values(array_filter(array_keys($series), fn ($w) => $w >= $from->toDateString()));
-        $trend = [
-            'labels' => $weeks,
-            'cases' => array_map(fn ($w) => $series[$w], $weeks),
-            'signals' => array_map(fn ($w) => (bool) ($eval[$w]['signal'] ?? false), $weeks),
-            'upper' => array_map(fn ($w) => $eval[$w]['upper'] ?? null, $weeks),
-        ];
-
-        // Comparison of areas below the selected one (last 4 weeks)
-        $children = $this->q->childTotals($area, $disease->id, $latest->subWeeks(3), $latest);
-        $rank = $children->every(fn ($c) => $c->incidence !== null) && $children->isNotEmpty() ? 'incidence' : 'cases';
-        $top = $children->sortByDesc($rank)->take(10)->values();
+        $panel = $this->panel($area, $disease, $latest);
+        $trend = $panel['trend'];
+        $top = $panel['top'];
+        $rank = $panel['rank'];
 
         $reportTrend = $this->q->reportingSeries($area, $latest->subWeeks(25), $latest);
 

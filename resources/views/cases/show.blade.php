@@ -85,7 +85,7 @@
                         <li><i class="fa fa-circle-o text-muted" aria-hidden="true"></i>
                             <span class="ow-list-main">{{ ['notified' => 'Notified', 'classified' => 'Classification changed', 'outcome' => 'Outcome recorded', 'investigated' => 'Investigation updated', 'lab_result' => 'Laboratory', 'note' => 'Note'][$e->type] ?? $e->type }}
                                 @if ($e->type === 'note' && $full)<small style="color:#1f2933">{{ $e->data['text'] ?? '' }}</small>@elseif ($e->type === 'classified')<small>{{ ucfirst($e->data['classification'] ?? '') }}</small>@elseif ($e->type === 'outcome')<small>{{ ucfirst($e->data['outcome'] ?? '') }}</small>@endif
-                                <small>{{ $full ? $e->occurred_at->format('d M Y H:i') : $e->occurred_at->format('d M Y') }}@if ($full && $e->user) · {{ $e->user->name }}@endif</small></span></li>
+                                <small>{{ $full ? $e->occurred_at->format('d M Y H:i') : 'Week of '.$e->occurred_at->startOfWeek()->format('d M Y') }}@if ($full && $e->user) · {{ $e->user->name }}@endif</small></span></li>
                     @endforeach
                 </ul>
                 @if ($canEdit)

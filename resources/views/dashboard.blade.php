@@ -35,10 +35,12 @@
         </div>
     </section>
 
-    <div class="ow-period" role="group" aria-label="Disease shown in the charts">
+    <div x-data="overview" data-url="{{ route('dashboard.data') }}" data-area="{{ $area->id }}">
+    <div class="ow-chips" role="group" aria-label="Disease shown in the charts">
         @foreach ($diseases as $d)
-            <a href="{{ route('dashboard', ['disease' => $d->code, 'area' => $area->id]) }}" class="btn btn-sm {{ $d->id === $disease->id ? 'btn-primary' : 'btn-default' }}" @if ($d->id === $disease->id) aria-current="true" @endif>{{ $d->name }}</a>
+            <a href="{{ route('dashboard', ['disease' => $d->code, 'area' => $area->id]) }}" data-code="{{ $d->code }}" data-name="{{ $d->name }}" @click="select" class="ow-chip {{ $d->id === $disease->id ? 'active' : '' }}" @if ($d->id === $disease->id) aria-current="true" @endif>{{ $d->name }}</a>
         @endforeach
+        <i class="fa fa-spinner fa-spin ow-spin" aria-hidden="true" x-show="loading" x-cloak></i><span class="sr-only" role="status" x-text="status"></span>
     </div>
 
     <div class="row ow-eq">
@@ -47,7 +49,7 @@
                 :summary="'Weekly cases of '.$disease->name.' in '.$area->name.'. Diamonds mark weeks above the outbreak signal threshold (baseline mean plus three standard deviations, at least '.config('surveillance.small_number_floor').' cases). The axis starts at zero.'">
                 <x-slot:actions><a href="{{ route('trends', ['disease' => $disease->code, 'area' => $area->id]) }}" class="btn btn-box-tool">Open trends</a></x-slot:actions>
                 <x-slot:table>
-                    <table class="table table-condensed"><thead><tr><th>Week starting</th><th class="text-right">Cases</th><th>Signal</th></tr></thead><tbody>
+                    <table class="table table-condensed"><thead><tr><th>Week starting</th><th class="text-right">Cases</th><th>Signal</th></tr></thead><tbody id="trend-tbody">
                         @foreach (array_reverse(array_keys($trend['labels'])) as $i)
                             <tr><td>{{ $trend['labels'][$i] }}</td><td class="text-right">{{ number_format($trend['cases'][$i]) }}</td><td>{{ $trend['signals'][$i] ? 'Above threshold' : '' }}</td></tr>
                         @endforeach
@@ -81,7 +83,7 @@
             <x-chart-card id="chart-top" :title="$disease->name.': '.($rank === 'incidence' ? 'highest incidence' : 'most cases').' in the last 4 weeks'" icon="fa-bar-chart" :height="300"
                 :summary="'Areas below '.$area->name.' ranked by '.($rank === 'incidence' ? 'cases per 100,000 people' : 'number of cases').' over the last four weeks. The axis starts at zero.'">
                 <x-slot:table>
-                    <table class="table table-condensed"><thead><tr><th>Area</th><th class="text-right">Cases</th><th class="text-right">Population</th><th class="text-right">Per 100,000</th></tr></thead><tbody>
+                    <table class="table table-condensed"><thead><tr><th>Area</th><th class="text-right">Cases</th><th class="text-right">Population</th><th class="text-right">Per 100,000</th></tr></thead><tbody id="top-tbody">
                         @foreach ($top as $t)<tr><td>{{ $t->name }}</td><td class="text-right">{{ number_format($t->cases) }}</td><td class="text-right">{{ $t->population ? number_format($t->population) : 'n/a' }}</td><td class="text-right">{{ $t->incidence !== null ? number_format($t->incidence, 1) : 'n/a' }}</td></tr>@endforeach
                     </tbody></table>
                 </x-slot:table>
@@ -94,6 +96,8 @@
         </div>
     </div>
 
+    </div>{{-- /overview --}}
+
     <div class="row ow-eq">
         <div class="col-md-12">
             <x-chart-card id="chart-vacc" title="Vaccination coverage, last 12 months" icon="fa-medkit" :height="260"
@@ -104,6 +108,9 @@
     </div>
 @endsection
 
+@push('alpine-lib')
+<script defer src="{{ asset('vendor/alpine/alpine.csp.min.js') }}"></script>
+@endpush
 @push('plugins')
 <script src="{{ asset('vendor/pusher/pusher.min.js') }}"></script>
 <script src="{{ asset('vendor/chartjs/chart.umd.js') }}"></script>
@@ -115,11 +122,14 @@
 <script @nonce>
 (function () {
     var floor = @js(config('surveillance.small_number_floor'));
-    owCharts.line('chart-trend', { labels: @js($trend['labels']), yTitle: 'Cases per week', floor: floor, ariaLabel: @js('Weekly cases of '.$disease->name),
+    var rankIsIncidence = @js($rank === 'incidence');
+    var charts = {};
+    charts.trend = owCharts.line('chart-trend', { labels: @js($trend['labels']), yTitle: 'Cases per week', floor: floor, ariaLabel: @js('Weekly cases of '.$disease->name),
         series: [{ label: 'Weekly cases', data: @js($trend['cases']), signals: @js($trend['signals']) },
                  { label: 'Signal threshold', data: @js($trend['upper']), color: '#6b7682', dashed: true }], points: true });
-    owCharts.bar('chart-top', { horizontal: true, labels: @js($top->pluck('name')), yTitle: @js($rank === 'incidence' ? 'Cases per 100,000 people' : 'Cases'), integer: @js($rank !== 'incidence'), floor: floor,
+    charts.top = owCharts.bar('chart-top', { horizontal: true, labels: @js($top->pluck('name')), yTitle: @js($rank === 'incidence' ? 'Cases per 100,000 people' : 'Cases'), integer: @js($rank !== 'incidence'), floor: floor,
         ariaLabel: @js('Areas ranked by '.$rank), series: [{ label: @js($rank === 'incidence' ? 'Per 100,000' : 'Cases'), data: @js($top->pluck($rank)->map(fn ($v) => round($v, 1))->values()) }] });
+    window.owOverviewCharts = charts;
     owCharts.line('chart-reporting', { labels: @js(array_keys($reportTrend)), yTitle: 'Reports received (%)', yMax: 100, integer: false, unit: '%', ariaLabel: 'Reporting completeness by week',
         series: [{ label: 'Completeness', data: @js(array_map(fn ($v) => round($v, 1), array_values($reportTrend))) }] });
     var vacc = @js($vacc);
@@ -127,5 +137,72 @@
         series: [{ label: 'Coverage', data: vacc.map(function (v) { return v.coverage; }) },
                  { label: 'Target', data: vacc.map(function (v) { return v.target; }), type: 'line', color: '#d55e00', order: 0 }] });
 }());
+</script>
+@endpush
+
+@push('alpine')
+<script @nonce>
+document.addEventListener('alpine:init', function () {
+    var esc = function (t) { return String(t === null || t === undefined ? '' : t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+    var num = function (v, d) { return v === null || v === undefined ? 'n/a' : Number(v).toLocaleString(undefined, { maximumFractionDigits: d || 0 }); };
+    Alpine.data('overview', function () {
+        return {
+            loading: false,
+            status: '',
+            select: function (event) {
+                event.preventDefault();
+                var link = event.currentTarget;
+                var root = this.$root;
+                var self = this;
+                var code = link.getAttribute('data-code');
+                var name = link.getAttribute('data-name');
+                self.loading = true;
+                self.status = 'Loading ' + name;
+                var url = root.getAttribute('data-url') + '?disease=' + encodeURIComponent(code) + '&area=' + encodeURIComponent(root.getAttribute('data-area'));
+                fetch(url, { headers: { Accept: 'application/json' }, credentials: 'same-origin' })
+                    .then(function (r) { if (!r.ok) { throw new Error('HTTP ' + r.status); } return r.json(); })
+                    .then(function (d) { self.apply(root, d, link); })
+                    .catch(function () { window.location = link.getAttribute('href'); });
+            },
+            apply: function (root, d, link) {
+                var c = window.owOverviewCharts;
+                var floor = @js(config('surveillance.small_number_floor'));
+                c.trend.data.labels = d.trend.labels;
+                var ds = c.trend.data.datasets;
+                ds[0].data = d.trend.cases;
+                ds[0].pointStyle = d.trend.signals.map(function (f) { return f ? 'rectRot' : 'circle'; });
+                ds[0].pointRadius = d.trend.signals.map(function (f) { return f ? 7 : 2; });
+                ds[0].pointBackgroundColor = d.trend.signals.map(function (f) { return f ? '#d55e00' : '#0072b2'; });
+                ds[0].pointBorderColor = d.trend.signals.map(function (f) { return f ? '#7a2f00' : '#0072b2'; });
+                ds[1].data = d.trend.upper;
+                c.trend.update();
+                var isInc = d.rank === 'incidence';
+                c.top.data.labels = d.top.map(function (t) { return t.name; });
+                c.top.data.datasets[0].data = d.top.map(function (t) { return isInc ? t.incidence : t.cases; });
+                c.top.data.datasets[0].label = isInc ? 'Per 100,000' : 'Cases';
+                c.top.options.scales.x.title.text = isInc ? 'Cases per 100,000 people' : 'Cases';
+                c.top.update();
+
+                document.getElementById('chart-trend-title').textContent = d.disease.name + ': weekly cases, last 52 weeks';
+                document.getElementById('chart-top-title').textContent = d.disease.name + ': ' + (isInc ? 'highest incidence' : 'most cases') + ' in the last 4 weeks';
+                var cap = document.getElementById('chart-trend-caption');
+                cap.textContent = 'Weekly cases of ' + d.disease.name + '. Diamonds mark weeks above the outbreak signal threshold (baseline mean plus three standard deviations, at least ' + floor + ' cases). The axis starts at zero.';
+                document.getElementById('chart-trend').setAttribute('aria-label', 'Weekly cases of ' + d.disease.name);
+
+                var tb = document.getElementById('trend-tbody');
+                if (tb) { tb.innerHTML = d.trend.labels.map(function (w, i) { return i; }).reverse().map(function (i) { return '<tr><td>' + esc(d.trend.labels[i]) + '</td><td class="text-right">' + num(d.trend.cases[i]) + '</td><td>' + (d.trend.signals[i] ? 'Above threshold' : '') + '</td></tr>'; }).join(''); }
+                var tt = document.getElementById('top-tbody');
+                if (tt) { tt.innerHTML = d.top.map(function (t) { return '<tr><td>' + esc(t.name) + '</td><td class="text-right">' + num(t.cases) + '</td><td class="text-right">' + (t.population ? num(t.population) : 'n/a') + '</td><td class="text-right">' + (t.incidence !== null ? num(t.incidence, 1) : 'n/a') + '</td></tr>'; }).join(''); }
+                var more = document.querySelector('#chart-trend-title').closest('.box').querySelector('.btn-box-tool');
+                if (more) { more.setAttribute('href', d.trendsUrl); }
+
+                root.querySelectorAll('.ow-chip').forEach(function (a) { var on = a === link; a.classList.toggle('active', on); if (on) { a.setAttribute('aria-current', 'true'); } else { a.removeAttribute('aria-current'); } });
+                history.replaceState(null, '', link.getAttribute('href'));
+                this.loading = false;
+                this.status = d.disease.name + ' charts updated';
+            }
+        };
+    });
+});
 </script>
 @endpush

@@ -123,7 +123,7 @@ class CaseController extends Controller
         ]);
         $before = $case->only('classification', 'outcome', 'status');
         $this->ingest->reclassify($case, $data['classification'], $data['outcome']);
-        $case->update(['status' => $data['status'], 'investigation_date' => $data['investigation_date'] ?: $case->investigation_date]);
+        $case->update(['status' => $data['status'], 'investigation_date' => ($data['investigation_date'] ?? null) ?: $case->investigation_date]);
         foreach (['classification' => 'classified', 'outcome' => 'outcome', 'status' => 'investigated'] as $field => $type) {
             if ($before[$field] !== $data[$field]) {
                 CaseEvent::create(['case_id' => $case->id, 'type' => $type, 'data' => [$field => $data[$field], 'from' => $before[$field]], 'user_id' => $request->user()->id, 'occurred_at' => now()]);

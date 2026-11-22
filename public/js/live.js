@@ -31,13 +31,14 @@
 
     var csrf = (document.querySelector('meta[name="csrf-token"]') || {}).content;
     var pusher = new Pusher(cfg.key, {
-        wsHost: cfg.host, wsPort: cfg.port, wssPort: cfg.port, forceTLS: cfg.scheme === 'https', enabledTransports: ['ws', 'wss'], cluster: 'mt1', disableStats: true,
+        wsHost: cfg.host, wsPort: cfg.port, wssPort: cfg.port, forceTLS: cfg.scheme === 'https', enabledTransports: cfg.scheme === 'https' ? ['wss'] : ['ws'], cluster: 'mt1', disableStats: true,
         channelAuthorization: { endpoint: '/broadcasting/auth', headers: { 'X-CSRF-TOKEN': csrf } }
     });
     pusher.connection.bind('connected', function () { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } });
-    pusher.connection.bind('unavailable', startPolling);
-    pusher.connection.bind('failed', startPolling);
-    pusher.connection.bind('error', startPolling);
+    // If the socket server cannot be reached, stop retrying and poll instead (it reconnects on the next page load).
+    function giveUp() { startPolling(); try { pusher.disconnect(); } catch (e) {} }
+    pusher.connection.bind('unavailable', giveUp);
+    pusher.connection.bind('failed', giveUp);
 
     var channel = pusher.subscribe('private-area.' + area);
     channel.bind('case.notified', function (e) {

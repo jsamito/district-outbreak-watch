@@ -490,3 +490,16 @@ main:focus { outline: none; }
 .ow-hero .lead { max-width: 60ch; color: var(--ink-2); }
 .ow-public h2 { font-size: 22px; margin-top: 30px; }
 .ow-public .ow-stat2 { margin-bottom: 15px; }
+
+/* Fixed header offset: keep the notice and page title clear of the top bar at every width */
+.fixed .content-wrapper, .fixed .right-side { padding-top: 54px; }
+@media (max-width: 767px) { .fixed .content-wrapper, .fixed .right-side { padding-top: 112px; } }
+.ow-banner { line-height: 1.4; padding: 8px 20px 8px; }
+.content-header { padding-top: 18px; }
+
+/* Small chips (disease switcher and filters) */
+.ow-chips { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 12px; align-items: center; }
+.ow-chip { display: inline-block; border: 1px solid #c9d0d8; background: #fff; color: var(--ink-2); border-radius: 14px; padding: 2px 11px; font-size: 12px; line-height: 20px; min-height: 24px; cursor: pointer; text-decoration: none; }
+.ow-chip:hover, .ow-chip:focus { background: #f1f4f7; color: var(--ink); text-decoration: none; }
+.ow-chip.active, .ow-chip[aria-current="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+.ow-chips .ow-spin { color: var(--muted); font-size: 13px; }

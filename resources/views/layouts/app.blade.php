@@ -1,4 +1,7 @@
 @php
+    $reverbConfig = config('broadcasting.default') === 'reverb'
+        ? ['key' => config('broadcasting.connections.reverb.key'), 'host' => env('REVERB_HOST', request()->getHost()), 'port' => (int) env('REVERB_PORT', 8080), 'scheme' => env('REVERB_SCHEME', 'http')]
+        : null;
     $appName = config('app.name');
     $pageTitle = $title ?? 'Overview';
     $user = auth()->user();
@@ -12,7 +15,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="robots" content="noindex, nofollow">
-    @if (config('broadcasting.default') === 'reverb')<meta name="reverb" content='@json(['key' => config('broadcasting.connections.reverb.key'), 'host' => env('REVERB_HOST', request()->getHost()), 'port' => (int) env('REVERB_PORT', 8080), 'scheme' => env('REVERB_SCHEME', 'http')])'>@endif
+    @if ($reverbConfig)<meta name="reverb" content='@json($reverbConfig)'>@endif
     <meta name="vendor-base" content="{{ asset('vendor/datatables') }}/">
     @if (session('status'))<meta name="flash-status" content="{{ session('status') }}">@endif
     <title>{{ $pageTitle }} · {{ $appName }}</title>
@@ -113,6 +116,7 @@
 
 {{-- Alpine.js is loaded only by pages that declare it (it needs 'unsafe-eval', so the strict policy leaves it out by default) --}}
 @stack('alpine')
+@stack('alpine-lib')
 
 <script src="{{ asset('vendor/jquery/jquery.min.js') }}"></script>
 <script src="{{ asset('vendor/bootstrap/js/bootstrap.min.js') }}"></script>

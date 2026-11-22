@@ -14,6 +14,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(Csp::class);
+        $this->app->bind(\App\Services\ControlChartService::class, fn () => new \App\Services\ControlChartService((int) config('surveillance.small_number_floor')));
     }
 
     public function boot(): void

@@ -108,8 +108,8 @@ class ScopeAccessTest extends TestCase
 
     public function test_dashboard_lists_navigation_by_permission(): void
     {
-        $clinician = $this->userFor('clinician', $this->facilityA);
+        $lab = $this->userFor('lab_officer', $this->districtA);
 
-        $this->actingAs($clinician)->get(route('dashboard'))->assertOk()->assertSee('Your access');
+        $this->actingAs($lab)->get(route('dashboard'))->assertOk()->assertSee('Your access')->assertSee('Lab worklist')->assertDontSee('Export data');
     }
 }

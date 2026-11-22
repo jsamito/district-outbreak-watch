@@ -11,6 +11,8 @@ class ControlChartService
 {
     public const PER = 100000;
 
+    public function __construct(private int $smallNumberFloor = 5) {}
+
     /**
      * @param array<string,float> $counts week => cases
      * @param array<string,float> $population week => population (same keys)
@@ -44,7 +46,7 @@ class ControlChartService
                 'rate' => $u !== null ? $u * self::PER : null,
                 'ucl' => $ucl !== null ? $ucl * self::PER : null,
                 'lcl' => $lcl !== null ? $lcl * self::PER : null,
-                'above_ucl' => $u !== null && $ucl !== null && $u > $ucl && $counts[$w] >= (int) config('surveillance.small_number_floor'),
+                'above_ucl' => $u !== null && $ucl !== null && $u > $ucl && $counts[$w] >= $this->smallNumberFloor,
                 'shift' => $run >= 8,
             ];
         }
