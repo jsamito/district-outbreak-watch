@@ -232,14 +232,14 @@ class CoreGapsTest extends TestCase
         $this->actingAs($fresh)->get(route('dashboard'))->assertOk();
     }
 
-    public function test_production_users_are_created_once_and_keep_changed_passwords(): void
+    public function test_standard_users_are_ready_to_use_and_keep_changed_passwords(): void
     {
         $north = \App\Models\OrgUnit::factory()->childOf($this->country, 'region')->create(['code' => 'UG3', 'name' => 'Northern']);
         $lira = \App\Models\OrgUnit::factory()->childOf($north, 'district')->create(['code' => 'UG3083', 'name' => 'Lira']);
         \App\Models\OrgUnit::factory()->childOf($lira, 'facility')->create(['code' => 'F11073118391', 'name' => 'Lira Regional Referral Hospital']);
         $this->country->update(['code' => 'UG']);
 
-        $this->seed(\Database\Seeders\ProductionUsersSeeder::class);
+        $this->seed(\Database\Seeders\UsersSeeder::class);
         $users = \App\Models\User::where('email', 'like', '%@gmail.com')->get()->keyBy('email');
         $this->assertCount(6, $users);
         $this->assertSame(['amito@gmail.com'], \App\Models\User::role('super_admin')->pluck('email')->all(), 'Amito is the only super user');
@@ -249,15 +249,24 @@ class CoreGapsTest extends TestCase
         $this->assertTrue($users['janet@gmail.com']->hasRole('regional_officer'));
         $this->assertSame('Northern', $users['janet@gmail.com']->orgUnits->first()->name);
         foreach ($users as $u) {
-            $this->assertTrue($u->must_change_password);
+            $this->assertFalse($u->must_change_password, 'ready to use at once');
             $this->assertTrue(\Illuminate\Support\Facades\Hash::check('Admin@123', $u->password));
         }
 
         $amito = $users['amito@gmail.com'];
         $amito->forceFill(['password' => \Illuminate\Support\Facades\Hash::make('My-Own-Password-2026'), 'must_change_password' => false])->save();
-        $this->seed(\Database\Seeders\ProductionUsersSeeder::class);
+        $this->seed(\Database\Seeders\UsersSeeder::class);
         $this->assertTrue(\Illuminate\Support\Facades\Hash::check('My-Own-Password-2026', $amito->fresh()->password), 're-running never resets a password');
         $this->assertFalse($amito->fresh()->must_change_password);
+
+        $this->artisan('surveillance:install-users', ['--reset-passwords' => true])->assertSuccessful();
+        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('Admin@123', $amito->fresh()->password), '--reset-passwords restores the initial password');
+        $this->assertSame(6, \App\Models\User::count());
+
+        config(['surveillance.force_password_change' => true]);
+        \App\Models\User::query()->delete();
+        $this->seed(\Database\Seeders\UsersSeeder::class);
+        $this->assertTrue(\App\Models\User::where('email', 'susan@gmail.com')->first()->must_change_password, 'the switch forces a change at first sign-in');
     }
 
     public function test_regional_officer_sees_their_region_only(): void

@@ -66,7 +66,7 @@ php artisan serve                           # http://localhost:8000
 
 ### Available users
 
-**Live installation** (https://public-health-surveillance.joseneous.com), created by `surveillance:install-sample --no-users --production-users`. Every account has the same **temporary** initial password: `Admin@123`.
+`php artisan surveillance:install-sample` creates these six accounts as its last step, so the system is ready to use as soon as it finishes. Every account has the password **`Admin@123`**.
 
 | Email | Name | Role | Area |
 |---|---|---|---|
@@ -77,9 +77,11 @@ php artisan serve                           # http://localhost:8000
 | `clinician.lira@gmail.com` | Lira Hospital Clinician | clinician | Lira Regional Referral Hospital |
 | `lab.lira@gmail.com` | Lira Hospital Laboratory | lab_officer | Lira Regional Referral Hospital |
 
-Every account must choose its own password at first sign-in (12 or more characters, upper and lower case, a number); nothing else opens until it does, and re-running the installer never resets a changed password. **Sign in with each account straight after deploying**, because `Admin@123` is a known password until it has been changed. Replace the emails above with the real ones in `database/seeders/ProductionUsersSeeder.php` before the first install. Only Amito, Susan and Janet receive alert emails; the three role accounts keep alerts on screen only.
-
-**Local development** (created by `surveillance:install-sample`; the password is `SAMPLE_USER_PASSWORD` in `.env`): `admin@`, `manager@`, `epi@`, `officer.kasese@`, `officer.kampala@`, `clinician@`, `lab@outbreak-watch.test`. **Never create these on a production database.**
+- Passwords can be changed from the account menu (top right, **Change password**; at least 12 characters with upper and lower case letters and a number).
+- On a real installation set `SURVEILLANCE_FORCE_PASSWORD_CHANGE=true` in `.env` before installing, so each person must choose their own password at first sign-in. Accounts created later on the Users screen always must.
+- `php artisan surveillance:install-users` creates or updates these accounts without touching any other data and keeps passwords people have chosen; add `--reset-passwords` to put everyone back on `Admin@123`.
+- Only Amito, Susan and Janet receive alert emails; the three role accounts keep alerts on screen only. Replace the addresses in `database/seeders/UsersSeeder.php` with real ones before the first install.
+- `Admin@123` is a well-known password. While this README is public, anyone can sign in as Amito, so keep the repository private or change the passwords as soon as the site is live.
 
 Create other users on Admin > Users, or with:
 
@@ -107,14 +109,15 @@ Settings live in `.env` and `config/surveillance.php`.
 | `SURVEILLANCE_REALTIME` | Use WebSockets (Reverb) for live updates | `false` |
 | `TRUSTED_PROXIES` | Proxy addresses (or `*`) when behind a load balancer | unset |
 | `MAIL_*`, `MAIL_FROM_ADDRESS` | Outgoing email. Use `smtp` in production and a sender on your own domain | `log` |
-| `SAMPLE_USER_PASSWORD` | Password given to sample accounts | set in `.env` |
+| `SURVEILLANCE_FORCE_PASSWORD_CHANGE` | Make the installed accounts choose a new password at first sign-in | `false` |
 | `small_number_floor` (config) | Counts below this are marked "small number" | `5` |
 
 ## Commands
 
 | Command | What it does |
 |---|---|
-| `surveillance:install-sample` | Wipe and build a complete working system. It shows which database it will erase and asks yes/no (default no); in production you must also type the database name. `--force` skips the questions (scripts only). `--no-users` skips the local sample accounts; `--production-users` creates the live accounts above |
+| `surveillance:install-sample` | Wipe and build a complete working system, then create the accounts above. It shows which database it will erase and asks yes/no (default no); in production you must also type the database name. `--force` skips the questions (scripts only) |
+| `surveillance:install-users` | Create or update the standard accounts only; `--reset-passwords` puts everyone back on `Admin@123` |
 | `surveillance:create-user` | Create a user with a role and area |
 | `surveillance:issue-api-token` | Register a facility system and print its token once |
 | `surveillance:simulate-notifications` | Send test notifications through the live pipeline |

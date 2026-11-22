@@ -10,6 +10,9 @@ return [
 
     // Live dashboard updates over WebSockets (needs `php artisan reverb:start`). When off, pages poll a small JSON summary instead.
     'realtime' => env('SURVEILLANCE_REALTIME', false),
+
+    // When true, the accounts created by the installer must choose their own password at first sign-in. Accounts made on the Users screen always must.
+    'force_password_change' => env('SURVEILLANCE_FORCE_PASSWORD_CHANGE', false),
     'reverb' => ['host' => env('REVERB_HOST'), 'port' => (int) env('REVERB_PORT', 8080), 'scheme' => env('REVERB_SCHEME', 'http')],
 
     'country' => ['code' => 'UG', 'name' => 'Uganda'],

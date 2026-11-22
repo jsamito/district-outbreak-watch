@@ -8,16 +8,20 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 
 /**
- * Accounts for the live installation at https://public-health-surveillance.joseneous.com.
+ * The people who use the system, installed by `surveillance:install-sample` and `surveillance:install-users`.
  *
  * Amito is the only super user. Susan is the District Health Officer for Lira and Janet is the regional officer for the
- * Northern region (where Lira is). The other Lira accounts let every role be shown with a real place. Every initial
- * password is temporary: the person must choose their own at first sign-in. A password is only set when the account
- * is created, so running the seeder again never resets a password someone has already changed.
+ * Northern region (where Lira is). The other Lira accounts let every role be shown with a real place. Everyone starts
+ * with the password Admin@123 and can use the system at once; they can change it from the account menu. To make
+ * first sign-in force a new password (recommended on a real installation) set SURVEILLANCE_FORCE_PASSWORD_CHANGE=true.
+ * Running the seeder again keeps passwords people have chosen unless $resetPasswords is set.
  */
-class ProductionUsersSeeder extends Seeder
+class UsersSeeder extends Seeder
 {
     public const INITIAL_PASSWORD = 'Admin@123';
+
+    /** Set true to put every account back on the initial password. */
+    public bool $resetPasswords = false;
     public const NORTHERN_REGION = 'UG3';
     public const LIRA_DISTRICT = 'UG3083';
     public const LIRA_HOSPITAL = 'F11073118391'; // Lira Regional Referral Hospital
@@ -42,11 +46,15 @@ class ProductionUsersSeeder extends Seeder
         }
 
         foreach (self::USERS as [$email, $name, $role, $title, $areaCode]) {
+            $force = (bool) config('surveillance.force_password_change', false);
             $user = User::where('email', $email)->first();
             if (! $user) {
-                $user = User::create(['email' => $email, 'name' => $name, 'password' => self::INITIAL_PASSWORD, 'job_title' => $title, 'active' => true, 'must_change_password' => true]);
+                $user = User::create(['email' => $email, 'name' => $name, 'password' => self::INITIAL_PASSWORD, 'job_title' => $title, 'active' => true, 'must_change_password' => $force]);
             } else {
                 $user->update(['name' => $name, 'job_title' => $title, 'active' => true]);
+                if ($this->resetPasswords) {
+                    $user->forceFill(['password' => \Illuminate\Support\Facades\Hash::make(self::INITIAL_PASSWORD), 'must_change_password' => $force, 'password_changed_at' => null])->save();
+                }
             }
             $user->syncRoles([$role]);
             $user->orgUnits()->sync([$areas[$areaCode]->id]);

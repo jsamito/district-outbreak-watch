@@ -11,9 +11,9 @@ This is the checklist for putting District Outbreak Watch on a public server. It
 5. **Permissions.** The web user must be able to write `storage/` and `bootstrap/cache/`: `chown -R www-data:www-data storage bootstrap/cache && chmod -R ug+rwX storage bootstrap/cache`.
 6. **Install.** On an empty database only. The command shows the database it will erase and asks `yes/no` (the default is no); in production it also asks you to type the database name:
    ```bash
-   php artisan surveillance:install-sample --no-users --production-users
+   php artisan surveillance:install-sample
    ```
-   It builds the schema, loads the Uganda geography and reference data, generates the sample series and cases, runs the checks and creates the live accounts listed in the README (all with the temporary password `Admin@123`, which each person must replace at first sign-in). Before running it, open `database/seeders/ProductionUsersSeeder.php` and set the real email addresses.
+   It builds the schema, loads the Uganda geography and reference data, generates the sample series and cases, runs the checks and creates the six accounts listed in the README, all with the password `Admin@123`, so the site is ready to use when it finishes. Before running it, open `database/seeders/UsersSeeder.php` and set the real email addresses, and set `SURVEILLANCE_FORCE_PASSWORD_CHANGE=true` in `.env` if each person should choose their own password at first sign-in.
 7. **Caches.** `php artisan config:cache && php artisan route:cache && php artisan view:cache`.
 8. **Scheduler.** Add the cron line from section 1 below.
 9. **Check.** Sign in as one of the administrators, change the temporary password when asked, and open each menu item. `curl -sI https://public-health-surveillance.joseneous.com | grep -i strict-transport` must show the HSTS header.
@@ -56,6 +56,6 @@ Start DMARC at `p=none` for two weeks, read the reports, then move to `quarantin
 
 ## 5. Before go-live
 
-- Change all sample passwords or run without the sample users (`surveillance:install-sample --no-users`), and create real accounts with `surveillance:create-user`.
+- Change the `Admin@123` passwords (or force a change with `SURVEILLANCE_FORCE_PASSWORD_CHANGE=true` before installing) and create further accounts on the Users screen or with `surveillance:create-user`.
 - Run `composer audit` and `npm audit` equivalents (vendored front-end libraries are listed in `README.md`); review the result.
 - Lighthouse (mobile) on the live URL for the public pages and the signed-in dashboard; test on a throttled connection.
