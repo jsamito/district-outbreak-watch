@@ -25,24 +25,27 @@
     }
 
     var meta = document.querySelector('meta[name="reverb"]');
-    if (!meta || !window.Pusher) { startPolling(); return; }
-    var cfg;
-    try { cfg = JSON.parse(meta.content); } catch (e) { startPolling(); return; }
+    if (!meta || !window.owLib) { startPolling(); return; }
+    owLib('pusher').then(connect, startPolling);
 
-    var csrf = (document.querySelector('meta[name="csrf-token"]') || {}).content;
-    var pusher = new Pusher(cfg.key, {
-        wsHost: cfg.host, wsPort: cfg.port, wssPort: cfg.port, forceTLS: cfg.scheme === 'https', enabledTransports: cfg.scheme === 'https' ? ['wss'] : ['ws'], cluster: 'mt1', disableStats: true,
-        channelAuthorization: { endpoint: '/broadcasting/auth', headers: { 'X-CSRF-TOKEN': csrf } }
-    });
-    pusher.connection.bind('connected', function () { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } });
-    // If the socket server cannot be reached, stop retrying and poll instead (it reconnects on the next page load).
-    function giveUp() { startPolling(); try { pusher.disconnect(); } catch (e) {} }
-    pusher.connection.bind('unavailable', giveUp);
-    pusher.connection.bind('failed', giveUp);
+    function connect() {
+        var cfg;
+        try { cfg = JSON.parse(meta.content); } catch (e) { startPolling(); return; }
+        var csrf = (document.querySelector('meta[name="csrf-token"]') || {}).content;
+        var pusher = new Pusher(cfg.key, {
+            wsHost: cfg.host, wsPort: cfg.port, wssPort: cfg.port, forceTLS: cfg.scheme === 'https', enabledTransports: cfg.scheme === 'https' ? ['wss'] : ['ws'], cluster: 'mt1', disableStats: true,
+            channelAuthorization: { endpoint: '/broadcasting/auth', headers: { 'X-CSRF-TOKEN': csrf } }
+        });
+        pusher.connection.bind('connected', function () { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } });
+        // If the socket server cannot be reached, stop retrying and poll instead (it reconnects on the next page load).
+        function giveUp() { startPolling(); try { pusher.disconnect(); } catch (e) {} }
+        pusher.connection.bind('unavailable', giveUp);
+        pusher.connection.bind('failed', giveUp);
 
-    var channel = pusher.subscribe('private-area.' + area);
-    channel.bind('case.notified', function (e) {
-        if (window.owToast) { owToast('info', 'New ' + e.disease + ' notification in ' + e.area + ' (' + e.district_cases + ' cases this week there).'); }
-        refresh();
-    });
+        var channel = pusher.subscribe('private-area.' + area);
+        channel.bind('case.notified', function (e) {
+            if (window.owToast) { owToast('info', 'New ' + e.disease + ' notification in ' + e.area + ' (' + e.district_cases + ' cases this week there).'); }
+            refresh();
+        });
+    }
 }());

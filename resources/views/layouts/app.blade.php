@@ -1,4 +1,10 @@
 @php
+    $lazyAssets = [
+        'select2' => [asset_ver('vendor/select2/select2.min.css'), asset_ver('vendor/select2/select2.min.js')],
+        'datepicker' => [asset_ver('vendor/datepicker/datepicker3.css'), asset_ver('vendor/datepicker/bootstrap-datepicker.js')],
+        'toastr' => [asset_ver('vendor/toastr/toastr.min.css'), asset_ver('vendor/toastr/toastr.min.js')],
+        'pusher' => ['', asset_ver('vendor/pusher/pusher.min.js')],
+    ];
     $reverbConfig = config('broadcasting.default') === 'reverb'
         ? ['key' => config('broadcasting.connections.reverb.key'), 'host' => env('REVERB_HOST', request()->getHost()), 'port' => (int) env('REVERB_PORT', 8080), 'scheme' => env('REVERB_SCHEME', 'http')]
         : null;
@@ -16,7 +22,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="robots" content="noindex, nofollow">
     @if ($reverbConfig && config('surveillance.realtime'))<meta name="reverb" content='@json($reverbConfig)'>@endif
-    <meta name="vendor-base" content="{{ asset_ver('vendor/datatables') }}/">
+    <meta name="vendor-base" content="{{ asset('vendor/datatables') }}/">
+    <meta name="assets" content='@json($lazyAssets)'>
     @if (session('status'))<meta name="flash-status" content="{{ session('status') }}">@endif
     <link rel="icon" type="image/svg+xml" href="{{ asset_ver('favicon.svg') }}">
     <title>{{ $pageTitle }} · {{ $appName }}</title>

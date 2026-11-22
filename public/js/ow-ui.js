@@ -17,7 +17,7 @@
     window.owLib = function (name) {
         if (!libs[name]) {
             var a = assetMap[name];
-            if (!a) { libs[name] = Promise.resolve(); } else { addCss(a[0]); libs[name] = addJs(a[1]); }
+            if (!a) { libs[name] = Promise.resolve(); } else { if (a[0]) { addCss(a[0]); } libs[name] = addJs(a[1]); }
         }
         return libs[name];
     };
