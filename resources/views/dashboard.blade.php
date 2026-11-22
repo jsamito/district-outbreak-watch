@@ -6,7 +6,7 @@
     <form method="GET" action="{{ route('dashboard') }}" class="form-inline" aria-label="Choose area">
         <input type="hidden" name="disease" value="{{ $disease->code }}">
         <label for="ov-area" class="sr-only">Area</label>
-        <select id="ov-area" name="area" class="form-control input-sm" onchange="this.form.submit()">
+        <select id="ov-area" name="area" class="form-control input-sm" data-autosubmit="1">
             @foreach ($areaChoices as $o)
                 <option value="{{ $o->id }}" @selected($o->id == $area->id)>{{ $o->name }}@if ($o->type === 'region') region @endif</option>
             @endforeach

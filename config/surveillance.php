@@ -4,6 +4,10 @@ return [
     // Shown as a data notice while the system holds synthetic test data. Set to false for production data.
     'synthetic_data' => env('SURVEILLANCE_SYNTHETIC_DATA', true),
 
+    // Production hardening: redirect HTTP to HTTPS and send HSTS. Enabled automatically outside local development.
+    'force_https' => env('SURVEILLANCE_FORCE_HTTPS', env('APP_ENV') === 'production'),
+    'hsts' => env('SURVEILLANCE_HSTS', true),
+
     'country' => ['code' => 'UG', 'name' => 'Uganda'],
 
     // Open population data is one projected year per district; other years use a flat growth rate.

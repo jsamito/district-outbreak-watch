@@ -4,7 +4,7 @@
 @section('actions')
     <form method="GET" action="{{ route('reporting') }}" class="form-inline" aria-label="Choose area">
         <label for="rp-area" class="sr-only">Area</label>
-        <select id="rp-area" name="area" class="form-control input-sm" onchange="this.form.submit()">
+        <select id="rp-area" name="area" class="form-control input-sm" data-autosubmit="1">
             @foreach ($areaChoices as $o)<option value="{{ $o->id }}" @selected($o->id == $area->id)>{{ $o->name }}@if ($o->type === 'region') region @endif</option>@endforeach
         </select>
     </form>

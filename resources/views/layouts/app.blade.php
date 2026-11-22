@@ -82,7 +82,7 @@
         @if (config('surveillance.synthetic_data'))
         <div class="ow-banner no-print" role="note">
             <i class="fa fa-info-circle" aria-hidden="true"></i>
-            <strong>Data notice:</strong> weekly facility reports, immunization doses and case records in this system are generated sample data; no real patient information is held. Geography and population come from open data (see <a href="{{ route('home') }}#data">About the data</a>).
+            <strong>Data notice:</strong> weekly facility reports, immunization doses and case records in this system are generated sample data; no real patient information is held. Geography and population come from open data (see <a href="{{ route('about') }}">About the data</a>).
         </div>
         @endif
         <main id="main" tabindex="-1">
@@ -107,13 +107,12 @@
     <footer class="main-footer no-print">
         <div class="pull-right hidden-xs">Open data: HDX COD-AB, COD-PS, Healthsites, WHO GHO</div>
         <strong><i class="fa fa-heartbeat" aria-hidden="true"></i> District Outbreak Watch</strong>
-        <span class="hidden-xs"> · <a href="{{ route('home') }}#data">About the data</a></span>
+        <span class="hidden-xs"> · <a href="{{ route('about') }}">About the data</a></span>
     </footer>
 </div>
 
-{{-- Alpine data registrations must run before Alpine starts --}}
+{{-- Alpine.js is loaded only by pages that declare it (it needs 'unsafe-eval', so the strict policy leaves it out by default) --}}
 @stack('alpine')
-<script defer src="{{ asset('vendor/alpine/alpine.min.js') }}"></script>
 
 <script src="{{ asset('vendor/jquery/jquery.min.js') }}"></script>
 <script src="{{ asset('vendor/bootstrap/js/bootstrap.min.js') }}"></script>
@@ -124,7 +123,7 @@
 <script src="{{ asset('vendor/datepicker/bootstrap-datepicker.js') }}"></script>
 <script src="{{ asset('vendor/toastr/toastr.min.js') }}"></script>
 @stack('plugins')
-<script>window.owTitle = @js($pageTitle . ' · ' . $appName);</script>
+<script @nonce>window.owTitle = @js($pageTitle . ' · ' . $appName);</script>
 <script src="{{ asset('js/ow-ui.js') }}"></script>
 @stack('scripts')
 </body>

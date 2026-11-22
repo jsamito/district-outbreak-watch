@@ -3,7 +3,7 @@
 
 @section('content')
     @php
-        $extra = '<div class="col-sm-6 col-md-3 form-group"><label for="f-antigen">Vaccine</label><select id="f-antigen" name="antigen" class="form-control" onchange="this.form.submit()">';
+        $extra = '<div class="col-sm-6 col-md-3 form-group"><label for="f-antigen">Vaccine</label><select id="f-antigen" name="antigen" class="form-control" data-autosubmit="1">';
         foreach ($antigens as $a) { $extra .= '<option value="'.e($a->code).'"'.($a->id === $antigen->id ? ' selected' : '').'>'.e($a->name).'</option>'; }
         $extra .= '</select></div><div class="col-sm-6 col-md-2 form-group"><label for="f-months">Months</label><select id="f-months" name="months" class="form-control">';
         foreach ([6, 12, 24, 36] as $m) { $extra .= '<option value="'.$m.'"'.($m === $months ? ' selected' : '').'>'.$m.'</option>'; }

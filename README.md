@@ -1,58 +1,71 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# District Outbreak Watch
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A secure, mobile-friendly disease-surveillance system for national and district health teams in Uganda. It receives notifications from facilities, turns them into trusted weekly indicators, flags unusual rises, alerts the right people without flooding them, supports case investigation, and publishes only aggregated data.
 
-## About Laravel
+Built with Laravel 13, AdminLTE 2, Chart.js, Leaflet and Laravel Reverb. MySQL 8 is the database.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## What it does
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+| Area | Capability |
+|---|---|
+| Dashboards | Overview, weekly trends, district map and comparison, u-chart quality control, vaccination coverage, reporting completeness, public attention, 1-4 week projections |
+| Alerts | Outbreak-signal and single-case rules; one alert per area and disease while a signal lasts; severity tiers; at most 5 immediate emails per person per hour; daily digest; escalation to national managers when unacknowledged |
+| Cases | Line list and case detail with a timeline, lab worklist and role-based detail. Every view is audited and **cases can never be exported** |
+| Live data | `POST /api/v1/notifications` (JSON or FHIR R4 Bundle, idempotent) updates indicators, checks alert rules and updates open dashboards over WebSockets, with polling as fallback |
+| Standards | ICD-10 on diseases and diagnoses; FHIR `MeasureReport` at `/fhir/MeasureReport`; FHIR Bundle accepted on the notification API |
+| Public site | National totals only, data sources and licences, sitemap, robots.txt, structured data, shareable summary card |
+| Security | Roles plus area scope enforced on the server, CSP with nonces, HSTS, no-store caching on signed-in pages, throttled sign-in, audit log |
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Roles
 
-## Learning Laravel
+`system_admin`, `national_manager`, `epidemiologist`, `district_officer`, `clinician`, `lab_officer`. A role says what a user can do; their areas say where. See `docs/PLAN.md` for the capability matrix.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Set up
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+Requirements: PHP 8.3+ with `pdo_mysql`, `gd` (with FreeType), `zip`, `intl`, Composer, MySQL 8.
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+composer install
+cp .env.example .env && php artisan key:generate
+# edit .env: DB_*, MAIL_*, APP_URL
+php artisan surveillance:install-sample     # database, Uganda geography, sample series, cases, projections
+php artisan serve                           # http://localhost:8000
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Sample accounts (created by `surveillance:install-sample`, password in `SAMPLE_USER_PASSWORD` in `.env`): `admin@`, `manager@`, `epi@`, `officer.kasese@`, `officer.kampala@`, `clinician@`, `lab@outbreak-watch.test`. **Never create these on a production database.**
 
-## Contributing
+Create real users with `php artisan surveillance:create-user EMAIL "Name" ROLE --area=CODE`.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Background processes for a full installation:
 
-## Code of Conduct
+```bash
+php artisan schedule:work        # hourly detection, escalation every 15 min, daily digest 07:00
+php artisan queue:work           # if QUEUE_CONNECTION=database
+php artisan reverb:start         # live dashboard updates (optional; the page falls back to polling)
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Facility systems register with `php artisan surveillance:issue-api-token "Name" FACILITY_CODE` and send `POST /api/v1/notifications` with `Authorization: Bearer TOKEN` and an `Idempotency-Key` header. `php artisan surveillance:simulate-notifications` sends test notifications through the same pipeline.
 
-## Security Vulnerabilities
+## Data
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Real, open data: Uganda boundaries (HDX COD-AB), district population by age and sex (UBOS via UNFPA, HDX COD-PS), facility locations (Healthsites, OpenStreetMap-derived), WHO immunization estimates, Wikipedia page views. No open weekly facility-level disease or district immunization series exists for Uganda, so those are **generated sample data** from real district populations and are labelled as such everywhere. Sources, licences and limits are in `DATA.md` and on the public "About the data" page. To use real surveillance data, load it through the notification API or replace the sample loader; set `SURVEILLANCE_SYNTHETIC_DATA=false` to remove the sample-data notices.
 
-## License
+Refresh the raw data files with `php artisan surveillance:prepare-geography DIR` (HDX downloads in `DIR`) and `php artisan surveillance:fetch-reference`.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Production checklist
+
+- Serve over HTTPS only. The app redirects HTTP and sends HSTS when `APP_ENV=production`; also set the header in the web server (`Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"`).
+- Set `APP_ENV=production`, `APP_DEBUG=false`, `SESSION_SECURE_COOKIE=true`, strong DB credentials, a real mail transport, and `TRUSTED_PROXIES` if behind a proxy.
+- Email authentication for the sending domain: SPF, DKIM and DMARC.
+- Scheduled database backups with a tested restore; keep the audit log.
+- Run `php artisan config:cache route:cache view:cache` and serve static assets with compression and long cache lifetimes.
+
+## Tests
+
+```bash
+php artisan test
+```
+
+## Project documents
+
+`docs/PLAN.md` (scope, models, phases), `docs/REQUIREMENTS.md` (stakeholders, user stories, indicators, request lifecycle), `docs/RESEARCH.md` (sources), `DATA.md` (provenance).

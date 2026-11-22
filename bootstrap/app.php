@@ -14,6 +14,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->trustProxies(at: env('TRUSTED_PROXIES'));
+        $middleware->prepend(\App\Http\Middleware\RedirectToHttps::class);
+        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
         $middleware->alias([
             'api.client' => \App\Http\Middleware\AuthenticateApiClient::class,
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
