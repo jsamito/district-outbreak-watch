@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->prepend(\App\Http\Middleware\RedirectToHttps::class);
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
         $middleware->alias([
+            'password.changed' => \App\Http\Middleware\EnsurePasswordChanged::class,
             'api.client' => \App\Http\Middleware\AuthenticateApiClient::class,
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,

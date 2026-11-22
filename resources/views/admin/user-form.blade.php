@@ -1,6 +1,7 @@
 @extends('layouts.app', ['title' => $title, 'breadcrumbs' => ['Users' => route('admin.users'), $title => '#']])
 @php
     $roleHelp = [
+        'super_admin' => 'Full access to every screen and every area: users, rules, API clients, data quality, cases, labs, alerts and exports.',
         'system_admin' => 'Manages users, data sources, API clients and alert rules. Sees no case records.',
         'national_manager' => 'Sees every area: charts, alerts, forecasts and exports. Acknowledges alerts and manages rules.',
         'epidemiologist' => 'Sees charts, forecasts and pseudonymised case lists (no names, facilities or exact dates).',

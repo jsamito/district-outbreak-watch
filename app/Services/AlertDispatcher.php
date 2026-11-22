@@ -27,7 +27,7 @@ class AlertDispatcher
     public function recipients(Alert $alert, int $level = 0): Collection
     {
         $alert->loadMissing('rule', 'orgUnit');
-        $roles = $level === 0 ? ($alert->rule->audience_roles ?? ['district_officer']) : ['national_manager'];
+        $roles = $level === 0 ? ($alert->rule->audience_roles ?? ['district_officer']) : ['national_manager', 'super_admin'];
 
         return User::role($roles)->where('active', true)->with('orgUnits')->get()
             ->filter(fn (User $u) => $u->canAccessOrgUnit($alert->orgUnit))

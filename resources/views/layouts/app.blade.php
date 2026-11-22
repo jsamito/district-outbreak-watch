@@ -9,7 +9,7 @@
         'tables' => ['', asset_ver('js/ow-tables.js')],
     ];
     $reverbConfig = config('broadcasting.default') === 'reverb'
-        ? ['key' => config('broadcasting.connections.reverb.key'), 'host' => env('REVERB_HOST', request()->getHost()), 'port' => (int) env('REVERB_PORT', 8080), 'scheme' => env('REVERB_SCHEME', 'http')]
+        ? ['key' => config('broadcasting.connections.reverb.key'), 'host' => config('surveillance.reverb.host') ?: request()->getHost(), 'port' => config('surveillance.reverb.port'), 'scheme' => config('surveillance.reverb.scheme')]
         : null;
     $appName = config('app.name');
     $pageTitle = $title ?? 'Overview';
@@ -73,6 +73,7 @@
                                 <span>{{ $roleLabel }}</span>
                             </li>
                             <li class="ow-user-menu-foot">
+                                <a href="{{ route('password.edit') }}" class="btn btn-default btn-block btn-sm" style="margin-bottom:6px"><i class="fa fa-key" aria-hidden="true"></i> Change password</a>
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
                                     <button type="submit" class="btn btn-default btn-block btn-sm">

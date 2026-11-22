@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Admin\AuditController;
 use App\Http\Controllers\Admin\SourceController;
 use App\Http\Controllers\Admin\UserController;
@@ -50,7 +51,9 @@ Route::middleware('guest')->group(function (): void {
 Route::post('/logout', [LoginController::class, 'destroy'])->middleware('auth')->name('logout');
 
 /* Authenticated */
-Route::middleware('auth')->group(function (): void {
+Route::middleware(['auth', 'password.changed'])->group(function (): void {
+    Route::get('/account/password', [PasswordController::class, 'edit'])->name('password.edit');
+    Route::put('/account/password', [PasswordController::class, 'update'])->middleware('throttle:6,1')->name('password.update');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/areas/{orgUnit}', [OrgUnitController::class, 'show'])->name('areas.show');
 

@@ -25,7 +25,11 @@ window.owMap = function (elId, cfg) {
     info.addTo(map);
 
     fetch(cfg.geojsonUrl, { headers: { Accept: 'application/json' }, credentials: 'same-origin' }).then(function (r) { return r.json(); }).then(function (geo) {
+        /* Districts outside the user's area: plain grey outline for context, no hover, no click, no data. */
+        L.geoJSON(geo, { filter: function (f) { return !f.properties.accessible; }, interactive: false,
+            style: function () { return { fillColor: '#eceff1', fillOpacity: 1, weight: 0.6, color: '#c3cad2' }; } }).addTo(map);
         var layer = L.geoJSON(geo, {
+            filter: function (f) { return f.properties.accessible; },
             style: function (f) {
                 var v = values[f.properties.id] ? values[f.properties.id].v : null;
                 var flagged = cfg.flags && cfg.flags[f.properties.id];
@@ -39,7 +43,7 @@ window.owMap = function (elId, cfg) {
                 });
             }
         }).addTo(map);
-        map.fitBounds(layer.getBounds());
+        map.fitBounds(layer.getBounds().pad(0.5));
         var legend = L.control({ position: 'bottomleft' });
         legend.onAdd = function () {
             var d = L.DomUtil.create('div', 'ow-map-legend');
@@ -49,6 +53,7 @@ window.owMap = function (elId, cfg) {
                 html += '<span class="ow-swatch" style="background:' + shade(i) + '"></span>' + (i === 0 && from === hi ? owCharts.fmt(hi) : owCharts.fmt(from) + ' to ' + owCharts.fmt(hi)) + '<br>';
             });
             html += '<span class="ow-swatch" style="background:#e9ecef"></span>No data<br>';
+            if (geo.features.some(function (f) { return !f.properties.accessible; })) { html += '<span class="ow-swatch" style="background:#eceff1;border:1px solid #c3cad2"></span>Outside your area<br>'; }
             if (cfg.flags) { html += '<span class="ow-swatch" style="background:#fff;border:3px solid #d55e00"></span>Outbreak signal'; }
             d.innerHTML = html;
             return d;

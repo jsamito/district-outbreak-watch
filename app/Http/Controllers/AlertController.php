@@ -57,7 +57,7 @@ class AlertController extends Controller
             'labels' => $weeks, 'cases' => array_map(fn ($w) => $series[$w], $weeks), 'upper' => array_map(fn ($w) => $eval[$w]['upper'] ?? null, $weeks),
             'signals' => array_map(fn ($w) => (bool) ($eval[$w]['signal'] ?? false), $weeks),
             'canAcknowledge' => $request->user()->can('acknowledge', $alert),
-            'seeRecipients' => $request->user()->hasAnyRole(['national_manager', 'system_admin']),
+            'seeRecipients' => $request->user()->hasAnyRole(['national_manager', 'system_admin', 'super_admin']),
         ]);
     }
 

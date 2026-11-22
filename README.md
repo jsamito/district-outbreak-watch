@@ -41,6 +41,7 @@ Built with Laravel 13, AdminLTE 2 (CSS), Chart.js, Leaflet, Alpine.js and Larave
 
 | Role | Sees |
 |---|---|
+| `super_admin` | Everything: every screen and every area, including cases, labs, alerts, users, API clients, rules, data quality, exports and the audit log |
 | `system_admin` | Users, API clients, alert rules, data sources, audit log. No case records |
 | `national_manager` | Every area: dashboards, forecasts, alerts (acknowledge), alert rules, exports, audit summary, data-quality review |
 | `epidemiologist` | Dashboards, forecasts, alerts, pseudonymised case list and analytics, exports, data-quality review |
@@ -62,7 +63,25 @@ php artisan surveillance:install-sample     # database, Uganda geography, sample
 php artisan serve                           # http://localhost:8000
 ```
 
-Sample accounts (created by `surveillance:install-sample`; the password is `SAMPLE_USER_PASSWORD` in `.env`): `admin@`, `manager@`, `epi@`, `officer.kasese@`, `officer.kampala@`, `clinician@`, `lab@outbreak-watch.test`. **Never create these on a production database.** Create real users with:
+### Available users
+
+**Live installation** (https://public-health-surveillance.joseneous.com), created by `surveillance:install-sample --no-users --production-users`:
+
+| Email | Name | Role | Area | Initial password |
+|---|---|---|---|---|
+| `amito@joseneous.com` | Amito | super_admin (the administrator) | All Uganda | `puHoAJfapusn3P` |
+| `janet@joseneous.com` | Janet | super_admin | All Uganda | `hHUVJAq5exb2st` |
+| `susan@joseneous.com` | Susan | super_admin | All Uganda | `5NV3xGWumiJA6N` |
+| `dho.lira@joseneous.com` | Lira District Health Officer | district_officer | Lira district | `BuNYfSfYMCwtdk` |
+| `epi.lira@joseneous.com` | Lira Epidemiologist | epidemiologist | Lira district | `t5UoLmwwEmctfy` |
+| `clinician.lira@joseneous.com` | Lira Hospital Clinician | clinician | Lira Regional Referral Hospital | `e8X47camodJamn` |
+| `lab.lira@joseneous.com` | Lira Hospital Laboratory | lab_officer | Lira Regional Referral Hospital | `TJm3deCAKPyvCz` |
+
+These are **temporary** passwords. Every account must choose its own password at first sign-in (nothing else opens until it does), and re-running the installer never resets a changed password. Change or remove this table once the people have signed in, and set the real email addresses in `database/seeders/ProductionUsersSeeder.php` before the first install. The Lira role accounts have email alerts switched off until real mailboxes exist; alerts still show on screen.
+
+**Local development** (created by `surveillance:install-sample`; the password is `SAMPLE_USER_PASSWORD` in `.env`): `admin@`, `manager@`, `epi@`, `officer.kasese@`, `officer.kampala@`, `clinician@`, `lab@outbreak-watch.test`. **Never create these on a production database.**
+
+Create other users on Admin > Users, or with:
 
 ```bash
 php artisan surveillance:create-user EMAIL "Name" ROLE --area=CODE
@@ -95,7 +114,7 @@ Settings live in `.env` and `config/surveillance.php`.
 
 | Command | What it does |
 |---|---|
-| `surveillance:install-sample` | Wipe and build a complete working system (refuses in production without `--force`) |
+| `surveillance:install-sample` | Wipe and build a complete working system (refuses in production without `--force`). `--no-users` skips the local sample accounts; `--production-users` creates the live accounts above |
 | `surveillance:create-user` | Create a user with a role and area |
 | `surveillance:issue-api-token` | Register a facility system and print its token once |
 | `surveillance:simulate-notifications` | Send test notifications through the live pipeline |
@@ -138,7 +157,7 @@ curl -X POST https://your-domain/api/v1/notifications \
 
 - Server-side role and area checks on every route; inactive users are refused.
 - Content Security Policy with per-request nonces, no `unsafe-eval`; `X-Frame-Options: DENY`; HSTS on secure requests; `no-store` and `noindex` on signed-in pages.
-- Throttled sign-in, hashed passwords, hashed API tokens, encrypted raw notification payloads.
+- Temporary passwords must be changed at first sign-in (12+ characters, mixed case, a number); throttled sign-in, hashed passwords, hashed API tokens, encrypted raw notification payloads.
 - Audit log of sign-ins, case and analytics views, exports and configuration changes.
 - Public pages show national totals only. Case-level data has no export route (tested).
 
@@ -155,11 +174,11 @@ curl -X POST https://your-domain/api/v1/notifications \
 php artisan test
 ```
 
-78 tests cover sign-in, role and area isolation, indicator roll-up, detection and alerting, ingestion and idempotency, security headers, public pages, case analytics, data-quality checks, annotations, saved views, API client management and the alert rule form. Tests use a separate MySQL database (`outbreak_watch_test`, see `phpunit.xml`).
+82 tests cover sign-in, role and area isolation, indicator roll-up, detection and alerting, ingestion and idempotency, security headers, public pages, case analytics, data-quality checks, annotations, saved views, API client management and the alert rule form. Tests use a separate MySQL database (`outbreak_watch_test`, see `phpunit.xml`).
 
 ## Deployment
 
-Step-by-step server, HTTPS and HSTS, email (SPF, DKIM, DMARC), scheduler, WebSocket and backup instructions are in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). Minimum for production: `APP_ENV=production`, `APP_DEBUG=false`, `SESSION_SECURE_COOKIE=true`, strong database credentials, a real mail transport, no sample users, then `php artisan config:cache route:cache view:cache`.
+Step-by-step server, HTTPS and HSTS, email (SPF, DKIM, DMARC), scheduler, WebSocket and backup instructions are in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). Copy `.env.production.example` to `.env` for the live server (credentials go only in that file). Minimum for production: `APP_ENV=production`, `APP_DEBUG=false`, `SESSION_SECURE_COOKIE=true`, strong database credentials, a real mail transport, no sample users, then `php artisan config:cache route:cache view:cache`.
 
 ## Project layout
 

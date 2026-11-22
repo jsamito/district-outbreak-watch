@@ -36,7 +36,7 @@ class CreateUser extends Command
         }
 
         $codes = $this->option('area');
-        if (! $codes && in_array($role, ['system_admin', 'national_manager', 'epidemiologist'], true)) {
+        if (! $codes && in_array($role, ['super_admin', 'system_admin', 'national_manager', 'epidemiologist'], true)) {
             $codes = [config('surveillance.country.code')];
         }
         $units = OrgUnit::whereIn('code', $codes)->get();
@@ -48,7 +48,7 @@ class CreateUser extends Command
 
         $password = $this->option('password') ?: Str::password(14, symbols: false);
         $user = User::create([
-            'name' => $this->argument('name'), 'email' => $this->argument('email'), 'password' => $password,
+            'name' => $this->argument('name'), 'email' => $this->argument('email'), 'password' => $password, 'must_change_password' => true,
             'job_title' => $this->option('title') ?: str_replace('_', ' ', $role), 'active' => true,
         ]);
         $user->assignRole($role);

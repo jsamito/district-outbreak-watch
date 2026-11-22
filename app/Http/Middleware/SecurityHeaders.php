@@ -23,9 +23,9 @@ class SecurityHeaders
 
         $connect = ["'self'"];
         if (config('surveillance.realtime') && config('broadcasting.default') === 'reverb') {
-            $host = env('REVERB_HOST', $request->getHost());
-            $port = (int) env('REVERB_PORT', 8080);
-            $ws = env('REVERB_SCHEME', 'http') === 'https' ? 'wss' : 'ws';
+            $host = config('surveillance.reverb.host') ?: $request->getHost();
+            $port = (int) config('surveillance.reverb.port');
+            $ws = config('surveillance.reverb.scheme') === 'https' ? 'wss' : 'ws';
             $connect[] = "$ws://$host:$port";
             if ($host !== $request->getHost()) {
                 $connect[] = "$ws://{$request->getHost()}:$port";

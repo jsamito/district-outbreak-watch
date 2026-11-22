@@ -199,4 +199,61 @@ class CoreGapsTest extends TestCase
         preg_match_all('/<li class="active">\s*<a[^>]*>.*?<span>([^<]+)<\/span>/s', $html, $m);
         $this->assertSame(['Users'], $m[1]);
     }
+
+    public function test_super_admin_reaches_every_screen(): void
+    {
+        $this->notify($this->facA1);
+        $u = $this->userFor('super_admin', $this->country);
+        foreach (['dashboard', 'trends', 'map', 'quality', 'vaccination', 'reporting', 'forecasts', 'cases.index', 'cases.analytics', 'cases.create', 'lab.index', 'alerts.index',
+            'alert-rules.index', 'admin.users', 'admin.api-clients', 'admin.sources', 'admin.audit', 'quality-flags.index', 'exports.index'] as $name) {
+            $this->actingAs($u)->get(route($name))->assertOk();
+        }
+        $this->actingAs($u)->get(route('areas.show', $this->districtB))->assertOk();
+    }
+
+    public function test_temporary_password_must_be_changed_before_anything_else(): void
+    {
+        $u = $this->userFor('district_officer', $this->districtA);
+        $u->update(['must_change_password' => true]);
+
+        $this->actingAs($u)->get(route('dashboard'))->assertRedirect(route('password.edit'));
+        $this->actingAs($u)->get(route('cases.index'))->assertRedirect(route('password.edit'));
+        $this->actingAs($u)->get(route('password.edit'))->assertOk()->assertSee('Choose your own password');
+
+        $this->actingAs($u)->put(route('password.update'), ['current_password' => 'wrong', 'password' => 'Better-Password-2026', 'password_confirmation' => 'Better-Password-2026'])->assertSessionHasErrors('current_password');
+        $this->actingAs($u)->put(route('password.update'), ['current_password' => 'password', 'password' => 'short', 'password_confirmation' => 'short'])->assertSessionHasErrors('password');
+        $this->actingAs($u)->put(route('password.update'), ['current_password' => 'password', 'password' => 'password', 'password_confirmation' => 'password'])->assertSessionHasErrors('password');
+        $this->assertTrue($u->fresh()->must_change_password);
+
+        $this->actingAs($u)->put(route('password.update'), ['current_password' => 'password', 'password' => 'Better-Password-2026', 'password_confirmation' => 'Better-Password-2026'])->assertRedirect(route('dashboard'));
+        $fresh = $u->fresh();
+        $this->assertFalse($fresh->must_change_password);
+        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('Better-Password-2026', $fresh->password));
+        $this->actingAs($fresh)->get(route('dashboard'))->assertOk();
+    }
+
+    public function test_production_users_are_created_once_and_keep_changed_passwords(): void
+    {
+        \App\Models\OrgUnit::factory()->childOf($this->region, 'district')->create(['code' => 'UG3083', 'name' => 'Lira']);
+        $lira = \App\Models\OrgUnit::where('code', 'UG3083')->first();
+        \App\Models\OrgUnit::factory()->childOf($lira, 'facility')->create(['code' => 'F11073118391', 'name' => 'Lira Regional Referral Hospital']);
+        $this->country->update(['code' => 'UG']);
+
+        $this->seed(\Database\Seeders\ProductionUsersSeeder::class);
+        $this->assertSame(7, \App\Models\User::where('email', 'like', '%@joseneous.com')->count());
+        foreach (['amito', 'janet', 'susan'] as $n) {
+            $u = \App\Models\User::where('email', "$n@joseneous.com")->first();
+            $this->assertTrue($u->hasRole('super_admin'));
+            $this->assertSame(['Uganda'], $u->orgUnits->pluck('name')->all() ?: ['Uganda'], 'country scope');
+            $this->assertCount(18, $u->getAllPermissions());
+            $this->assertTrue($u->must_change_password);
+        }
+        $this->assertSame('Lira', \App\Models\User::where('email', 'dho.lira@joseneous.com')->first()->orgUnits->first()->name);
+
+        $amito = \App\Models\User::where('email', 'amito@joseneous.com')->first();
+        $amito->forceFill(['password' => \Illuminate\Support\Facades\Hash::make('My-Own-Password-2026'), 'must_change_password' => false])->save();
+        $this->seed(\Database\Seeders\ProductionUsersSeeder::class);
+        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('My-Own-Password-2026', $amito->fresh()->password), 're-running never resets a password');
+        $this->assertFalse($amito->fresh()->must_change_password);
+    }
 }

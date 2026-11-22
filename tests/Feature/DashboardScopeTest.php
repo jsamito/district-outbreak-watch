@@ -31,8 +31,16 @@ class DashboardScopeTest extends TestCase
         $o = $this->userFor('district_officer', $this->districtA);
         $this->actingAs($o)->get('/dashboard')->assertOk()->assertSee('Alpha District')->assertDontSee('Bravo District');
         $this->actingAs($o)->get('/map')->assertOk()->assertDontSee('Bravo District');
-        $geo = $this->actingAs($o)->getJson('/data/districts.geojson')->assertOk()->json('features');
-        $this->assertCount(0, $geo, 'fixture districts have no polygons, but none of Bravo may appear');
+        $square = ['type' => 'Polygon', 'coordinates' => [[[0, 0], [1, 0], [1, 1], [0, 0]]]];
+        $this->districtA->update(['geometry' => $square]);
+        $this->districtB->update(['geometry' => $square]);
+        $res = $this->actingAs($o)->getJson('/data/districts.geojson')->assertOk();
+        $features = collect($res->json('features'));
+        $this->assertCount(2, $features, 'every district is drawn so the map reads as the country');
+        $this->assertSame(['Alpha District'], $features->where('properties.accessible', true)->pluck('properties.name')->all());
+        $outside = $features->where('properties.accessible', false)->first();
+        $this->assertSame(['accessible' => false], $outside['properties'], 'outside districts carry no name, id or code');
+        $this->assertStringNotContainsString('Bravo', $res->getContent());
         foreach (['/trends', '/map', '/quality', '/vaccination', '/reporting', '/attention', '/exports/download?dataset=weekly_cases', '/forecasts'] as $url) {
             $sep = str_contains($url, '?') ? '&' : '?';
             $this->actingAs($o)->get($url.$sep.'area='.$this->districtB->id)->assertForbidden();

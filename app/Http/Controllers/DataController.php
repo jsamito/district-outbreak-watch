@@ -11,14 +11,21 @@ class DataController extends Controller
 {
     use ResolvesFilters;
 
-    /** District polygons limited to the districts the signed-in user may see. */
+    /**
+     * District polygons. Districts the user may see carry their name and id; every other district is sent as plain
+     * outline (no name, no id) so the map still reads as Uganda without exposing anything outside the user's area.
+     */
     public function districts(Request $request): JsonResponse
     {
         $area = $this->area($request);
         $root = $area->type === OrgUnit::FACILITY ? $area->parent : $area;
-        $features = OrgUnit::within($root)->where('type', OrgUnit::DISTRICT)->whereNotNull('geometry')->orderBy('name')->get(['id', 'name', 'code', 'path', 'geometry'])
-            ->filter(fn ($d) => $request->user()->canAccessOrgUnit($d))
-            ->map(fn ($d) => ['type' => 'Feature', 'properties' => ['id' => $d->id, 'name' => $d->name, 'code' => $d->code], 'geometry' => $d->geometry])->values();
+        $user = $request->user();
+        $features = OrgUnit::where('type', OrgUnit::DISTRICT)->whereNotNull('geometry')->orderBy('name')->get(['id', 'name', 'code', 'path', 'geometry'])
+            ->map(function ($d) use ($user, $root) {
+                $inside = ($d->path === $root->path || str_starts_with($d->path, $root->path.'/')) && $user->canAccessOrgUnit($d);
+
+                return ['type' => 'Feature', 'properties' => $inside ? ['id' => $d->id, 'name' => $d->name, 'code' => $d->code, 'accessible' => true] : ['accessible' => false], 'geometry' => $d->geometry];
+            })->values();
 
         return response()->json(['type' => 'FeatureCollection', 'features' => $features])->header('Cache-Control', 'private, max-age=600');
     }

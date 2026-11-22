@@ -2,6 +2,24 @@
 
 This is the checklist for putting District Outbreak Watch on a public server. Items marked **verify** must be checked on the real host; nothing here has been run against a live domain yet.
 
+## 0. First deployment: https://public-health-surveillance.joseneous.com
+
+1. **DNS and web server.** Point `public-health-surveillance.joseneous.com` at the server. The web root must be the `public/` folder, not the project folder. Get a certificate before going live (`certbot --nginx -d public-health-surveillance.joseneous.com` or the host's AutoSSL), because the application redirects to HTTPS and sends HSTS in production.
+2. **Code.** `git clone <repository> /var/www/public-health-surveillance && cd /var/www/public-health-surveillance`, then `composer install --no-dev --optimize-autoloader`. No Node build is needed.
+3. **Database.** Create an empty MySQL 8 database and a user with rights on it only.
+4. **Environment.** `cp .env.production.example .env`, fill in `DB_*` and the mail settings with the production credentials, then `php artisan key:generate --force`.
+5. **Permissions.** The web user must be able to write `storage/` and `bootstrap/cache/`: `chown -R www-data:www-data storage bootstrap/cache && chmod -R ug+rwX storage bootstrap/cache`.
+6. **Install.** On an empty database only (this command wipes the database):
+   ```bash
+   php artisan surveillance:install-sample --no-users --production-users --force
+   ```
+   It builds the schema, loads the Uganda geography and reference data, generates the sample series and cases, runs the checks and creates the live accounts listed in the README. Before running it, open `database/seeders/ProductionUsersSeeder.php` and set the real email addresses.
+7. **Caches.** `php artisan config:cache && php artisan route:cache && php artisan view:cache`.
+8. **Scheduler.** Add the cron line from section 1 below.
+9. **Check.** Sign in as one of the administrators, change the temporary password when asked, and open each menu item. `curl -sI https://public-health-surveillance.joseneous.com | grep -i strict-transport` must show the HSTS header.
+
+To update later: `git pull && composer install --no-dev -o && php artisan migrate --force && php artisan config:cache route:cache view:cache`. Never run `surveillance:install-sample` on a database that holds real data.
+
 ## 1. Server
 
 - PHP 8.3 or newer with `pdo_mysql`, `mbstring`, `gd`; MySQL 8; a web server (nginx or Apache) pointing at `public/`.

@@ -10,6 +10,12 @@ use Spatie\Permission\PermissionRegistrar;
 class RolesAndPermissionsSeeder extends Seeder
 {
     public const ROLES = [
+        // Everything the other roles can do together, for the people who run the whole system.
+        'super_admin' => [
+            'manage users', 'manage data sources', 'manage alert rules', 'view audit log', 'manage api clients', 'review data quality',
+            'view aggregates', 'view forecasts', 'view alerts', 'acknowledge alerts', 'export aggregates', 'annotate charts', 'view audit summary',
+            'view cases', 'view cases pseudonymised', 'edit cases', 'enter lab results', 'view lab worklist',
+        ],
         'system_admin' => [
             'manage users', 'manage data sources', 'manage alert rules', 'view audit log', 'manage api clients', 'review data quality',
         ],

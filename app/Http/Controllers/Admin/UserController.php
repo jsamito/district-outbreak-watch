@@ -33,7 +33,7 @@ class UserController extends Controller
     {
         $data = $this->validated($request);
         $password = Str::password(14, symbols: false);
-        $user = User::create(['name' => $data['name'], 'email' => $data['email'], 'job_title' => $data['job_title'] ?? null, 'password' => $password, 'active' => true]);
+        $user = User::create(['name' => $data['name'], 'email' => $data['email'], 'job_title' => $data['job_title'] ?? null, 'password' => $password, 'active' => true, 'must_change_password' => true]);
         $this->assign($user, $data);
         Audit::log(Audit::CONFIG, 'user_created', $user, ['role' => $data['role'], 'areas' => $user->orgUnits->pluck('code')]);
 
@@ -48,7 +48,7 @@ class UserController extends Controller
         $note = '';
         if ($request->boolean('reset_password')) {
             $password = Str::password(14, symbols: false);
-            $user->update(['password' => $password]);
+            $user->update(['password' => $password, 'must_change_password' => true]);
             $note = " New temporary password (shown once): $password";
         }
         if ($user->id === $request->user()->id && ! $user->active) {
