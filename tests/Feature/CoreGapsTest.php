@@ -163,4 +163,26 @@ class CoreGapsTest extends TestCase
         $this->assertEquals(3.0, $alert->observed);
         $this->assertFalse(Alert::where('org_unit_id', $this->districtB->id)->exists(), 'one case is not a cluster');
     }
+
+    public function test_alert_rule_form_saves_each_method_with_its_own_settings(): void
+    {
+        $admin = $this->userFor('national_manager', $this->country);
+        $this->actingAs($admin)->get(route('alert-rules.create'))->assertOk()->assertSee('When to raise an alert')->assertSee('Cluster');
+
+        $base = ['severity' => 'auto', 'cooldown_hours' => 48, 'audience_roles' => ['district_officer'], 'enabled' => 1];
+        $this->actingAs($admin)->post(route('alert-rules.store'), $base + ['name' => 'T', 'method' => 'threshold', 'min_count' => 1, 'threshold' => 25])->assertRedirect(route('alert-rules.index'));
+        $this->assertSame(25, AlertRule::where('name', 'T')->first()->params['threshold']);
+
+        $this->actingAs($admin)->post(route('alert-rules.store'), $base + ['name' => 'T2', 'method' => 'threshold', 'min_count' => 1])->assertSessionHasErrors('threshold');
+        $this->actingAs($admin)->post(route('alert-rules.store'), $base + ['name' => 'C', 'method' => 'cluster', 'min_count' => 4, 'cluster_days' => 10])->assertRedirect();
+        $this->assertSame(10, AlertRule::where('name', 'C')->first()->params['cluster_days']);
+        $this->actingAs($admin)->post(route('alert-rules.store'), $base + ['name' => 'S', 'method' => 'single_case', 'min_count' => 9])->assertRedirect();
+        $this->assertSame(1, AlertRule::where('name', 'S')->first()->min_count, 'a single-case rule always fires on one case');
+    }
+
+    public function test_user_form_explains_roles_and_creates_a_user(): void
+    {
+        $admin = $this->userFor('system_admin', $this->country);
+        $this->actingAs($admin)->get(route('admin.users.create'))->assertOk()->assertSee('What they can see')->assertSee('Sees only the lab worklist', false);
+    }
 }

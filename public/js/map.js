@@ -9,10 +9,14 @@ window.owMap = function (elId, cfg) {
     var nums = Object.keys(values).map(function (k) { return values[k].v; }).filter(function (v) { return v !== null; }).sort(function (a, b) { return a - b; });
     function q(p) { return nums.length ? nums[Math.min(nums.length - 1, Math.floor(p * nums.length))] : 0; }
     var breaks = [q(0.2), q(0.4), q(0.6), q(0.8)];
+    /* Classes with identical limits are merged, so a map of similar values never shows five "0.8 to 0.8" classes. */
+    var top = nums.length ? nums[nums.length - 1] : 0, lo = nums.length ? nums[0] : 0, uniq = [];
+    breaks.concat([top]).forEach(function (b) { if (!uniq.length || b > uniq[uniq.length - 1]) { uniq.push(b); } });
+    function shade(i) { return uniq.length === 1 ? scale[2] : scale[Math.round(i * (scale.length - 1) / (uniq.length - 1))]; }
     function colour(v) {
         if (v === null || v === undefined) { return '#e9ecef'; }
-        for (var i = 0; i < breaks.length; i++) { if (v <= breaks[i]) { return scale[i]; } }
-        return scale[4];
+        for (var i = 0; i < uniq.length; i++) { if (v <= uniq[i]) { return shade(i); } }
+        return shade(uniq.length - 1);
     }
     var map = L.map(el, { zoomControl: true, attributionControl: false, scrollWheelZoom: false, keyboard: true, preferCanvas: true });
     var info = L.control({ position: 'topright' });
@@ -39,12 +43,11 @@ window.owMap = function (elId, cfg) {
         var legend = L.control({ position: 'bottomleft' });
         legend.onAdd = function () {
             var d = L.DomUtil.create('div', 'ow-map-legend');
-            var lo = nums.length ? nums[0] : 0;
-            var bounds = [lo].concat(breaks).concat([nums.length ? nums[nums.length - 1] : 0]);
             var html = '<strong>' + cfg.legendTitle + '</strong><br>';
-            for (var i = 0; i < scale.length; i++) {
-                html += '<span class="ow-swatch" style="background:' + scale[i] + '"></span>' + owCharts.fmt(bounds[i]) + ' to ' + owCharts.fmt(bounds[i + 1]) + '<br>';
-            }
+            uniq.forEach(function (hi, i) {
+                var from = i === 0 ? lo : uniq[i - 1];
+                html += '<span class="ow-swatch" style="background:' + shade(i) + '"></span>' + (i === 0 && from === hi ? owCharts.fmt(hi) : owCharts.fmt(from) + ' to ' + owCharts.fmt(hi)) + '<br>';
+            });
             html += '<span class="ow-swatch" style="background:#e9ecef"></span>No data<br>';
             if (cfg.flags) { html += '<span class="ow-swatch" style="background:#fff;border:3px solid #d55e00"></span>Outbreak signal'; }
             d.innerHTML = html;

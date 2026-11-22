@@ -149,7 +149,7 @@ div.dataTables_wrapper div.dataTables_paginate .paginate_button.current:hover { 
 
 /* misc widgets */
 .ow-chart-container { position: relative; height: 260px; }
-.ow-empty { text-align: center; padding: 36px 20px; color: #99a3a8; }
+.ow-empty { text-align: center; padding: 36px 20px; color: #596470; }
 .ow-empty .fa { font-size: 2.2rem; margin-bottom: 10px; display: block; color: #cfd6da; }
 .ow-empty .fa.text-green { color: #00a65a; }
 .ow-ident { display: flex; align-items: center; gap: 10px; }
@@ -557,3 +557,57 @@ div.dataTables_wrapper div.dataTables_info { color: var(--muted); }
 .ow-views__panel hr { margin: 8px 0; }
 .ow-views__panel label { font-size: 12px; font-weight: 600; display: block; margin-bottom: 4px; }
 .ow-views__panel .checkbox-inline { font-weight: 400; margin: 6px 0; display: inline-block; }
+
+/* Forms: sectioned layout with short, predictable rows */
+.ow-form { max-width: 880px; }
+.ow-form .box-title { display: flex; align-items: center; gap: 8px; }
+.ow-step { display: inline-flex; width: 22px; height: 22px; border-radius: 50%; background: #1b2430; color: #fff; font-size: 12px; align-items: center; justify-content: center; }
+.ow-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0 18px; }
+.ow-fields--tight { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+.ow-fields [hidden], .ow-form [hidden] { display: none !important; }
+.ow-form .form-group { margin-bottom: 14px; }
+.ow-form .help-block { font-size: 12px; margin: 4px 0 0; color: var(--muted); }
+.ow-form select.form-control, .ow-form input.form-control { height: 36px; }
+.ow-legend { font-size: 13px; font-weight: 600; border: 0; margin: 0 0 6px; padding: 0; }
+.ow-methods { border: 0; padding: 0; margin: 0 0 14px; display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
+.ow-method { display: flex; gap: 9px; align-items: flex-start; margin: 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: 6px; cursor: pointer; font-weight: 400; background: #fff; }
+.ow-method input { margin-top: 3px; flex: none; }
+.ow-method__body { display: flex; flex-direction: column; gap: 2px; }
+.ow-method__body small { color: var(--muted); font-size: 12px; line-height: 1.4; }
+.ow-method.is-on { border-color: #2f6fba; box-shadow: 0 0 0 1px #2f6fba; background: #f3f8fd; }
+.ow-method:focus-within { outline: 3px solid rgba(47,111,186,.45); outline-offset: 1px; }
+.ow-legend { display: block; width: 100%; float: none; text-align: left; }
+.ow-form .checkbox-inline { margin: 0 18px 4px 0; padding-left: 20px; }
+
+/* Contrast: breadcrumb current page and empty states meet 4.5:1 */
+.content-header > .breadcrumb > li.active, .breadcrumb > .active { color: #3f4a59; }
+.ow-empty .fa { color: #9aa5b1; }
+
+/* Phone: breadcrumb flows under the title instead of overlapping the first box */
+@media (max-width: 767px) {
+    .content-header { display: flex; flex-direction: column; padding-bottom: 8px; }
+    .content-header > .breadcrumb { position: static; float: none; margin: 8px 0 0; padding: 4px 0; background: transparent; }
+}
+
+/* Phone: filters stack at full width (dates side by side); box titles never collide with their tools */
+@media (max-width: 767px) {
+    .ow-filters .box-body > .row > .form-group { flex: 0 0 100% !important; max-width: 100% !important; width: 100% !important; }
+    .ow-filters .box-body > .row > .form-group.col-xs-6 { flex: 0 0 calc(50% - 8px) !important; max-width: calc(50% - 8px) !important; width: calc(50% - 8px) !important; }
+    .ow-filters .form-control, .ow-filters .select2-container { width: 100% !important; }
+    .box-header .box-title { display: block; padding-right: 0; }
+    .box-header > .box-tools { position: static; float: none; margin: 4px 0 0; }
+}
+
+/* Select2 loads after this file, so these rules need extra specificity to keep it as tall as the other fields */
+body .select2-container--default .select2-selection--single { height: 34px; border: 1px solid #d2d6de; border-radius: 0; }
+body .select2-container--default .select2-selection--single .select2-selection__rendered { line-height: 32px; padding-left: 12px; padding-right: 28px; }
+body .select2-container--default .select2-selection--single .select2-selection__arrow { height: 32px; right: 4px; }
+body .select2-container--default .select2-selection--multiple { min-height: 34px; border: 1px solid #d2d6de; border-radius: 0; }
+
+/* Sidebar scrollbar: slim and dark, and gone when the sidebar is collapsed to icons, so it never covers the menu */
+.main-sidebar .sidebar { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: #3a4757 transparent; }
+.main-sidebar .sidebar::-webkit-scrollbar { width: 6px; }
+.main-sidebar .sidebar::-webkit-scrollbar-track { background: transparent; }
+.main-sidebar .sidebar::-webkit-scrollbar-thumb { background: #3a4757; border-radius: 3px; }
+.sidebar-collapse .main-sidebar .sidebar { scrollbar-width: none; }
+.sidebar-collapse .main-sidebar .sidebar::-webkit-scrollbar { display: none; }

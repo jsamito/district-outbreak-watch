@@ -66,7 +66,7 @@ class AlertRuleController extends Controller
 
         return [
             'name' => $d['name'], 'disease_id' => $d['disease_id'] ?? null, 'org_unit_id' => $d['org_unit_id'] ?? null, 'method' => $d['method'], 'severity' => $d['severity'],
-            'min_count' => $d['min_count'], 'cooldown_hours' => $d['cooldown_hours'], 'escalate_after_minutes' => $d['escalate_after_minutes'] ?? null,
+            'min_count' => $d['method'] === 'single_case' ? 1 : $d['min_count'], 'cooldown_hours' => $d['cooldown_hours'], 'escalate_after_minutes' => $d['escalate_after_minutes'] ?? null,
             'params' => ['baseline_weeks' => (int) ($d['baseline_weeks'] ?? 8), 'guard_weeks' => 1, 'sigmas' => (float) ($d['sigmas'] ?? 3), 'threshold' => (int) ($d['threshold'] ?? 10), 'cluster_days' => (int) ($d['cluster_days'] ?? 14)],
             'audience_roles' => array_values($d['audience_roles']), 'enabled' => $request->boolean('enabled'),
         ];
