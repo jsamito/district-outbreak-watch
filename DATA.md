@@ -12,7 +12,7 @@ No real or identifiable patient data is used anywhere in this project. Everythin
 | WHO Global Health Observatory | WHO GHO OData API, https://ghoapi.azureedge.net/api — indicators WHS8_110 (MCV1), WHS4_100 (DTP3), WHS4_543 (BCG), WUENIC estimates for Uganda. **Reuse terms not confirmed**: cite WHO and check terms before redistribution | National benchmark next to district coverage |
 | Wikipedia page views | Wikimedia Pageviews REST API, English Wikipedia, user traffic. Public API requiring a descriptive User-Agent. **Reuse terms not confirmed** | Web-attention metric. Global English page views, **not** specific to Uganda |
 
-Accessed 22 Nov 2026. Downloaded files are kept outside the repository; only small, derived aggregate files are committed under `database/data/`.
+Accessed November 2026. Downloaded files are kept outside the repository; only small, derived aggregate files are committed under `database/data/`.
 
 ## 2. Limits of the open data
 - **Facility types** are inferred from OpenStreetMap tags and names, not from Uganda's official health-centre levels (HC II, III, IV, hospitals). The mapping is a documented heuristic.
